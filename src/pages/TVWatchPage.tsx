@@ -19,13 +19,13 @@ export const TVWatchPage: React.FC = () => {
   const [seasonDetails, setSeasonDetails] = useState<SeasonDetails | null>(null);
   const [currentEpisodeObj, setCurrentEpisodeObj] = useState<EpisodeDetails | null>(null);
   const [recommendations, setRecommendations] = useState<NormalizedMedia[]>([]);
-  const [activeServer, setActiveServer] = useState<'embedsu' | 'apiplayer' | 'vidsrc' | 'vidsrcpro' | 'autoembed' | 'embed2'>('embedsu');
+  const [activeServer, setActiveServer] = useState<'vidsrc' | 'apiplayer' | 'autoembed' | 'vidsrcpro' | 'embed2'>('vidsrc');
   const [playerUrl, setPlayerUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [playerError, setPlayerError] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
 
-  const updatePlayerUrl = useCallback((mediaObj: NormalizedMedia, srvId: 'embedsu' | 'apiplayer' | 'vidsrc' | 'vidsrcpro' | 'autoembed' | 'embed2', sNum: number, epNum: number) => {
+  const updatePlayerUrl = useCallback((mediaObj: NormalizedMedia, srvId: 'vidsrc' | 'apiplayer' | 'autoembed' | 'vidsrcpro' | 'embed2', sNum: number, epNum: number) => {
     const url = getPlaybackUrl(mediaObj, {
       season: sNum,
       episode: epNum,
@@ -87,7 +87,7 @@ export const TVWatchPage: React.FC = () => {
     loadTVWatch();
   }, [id, currentSeasonNum, currentEpisodeNum]);
 
-  const handleServerChange = (srvId: 'embedsu' | 'apiplayer' | 'vidsrc' | 'vidsrcpro' | 'autoembed' | 'embed2') => {
+  const handleServerChange = (srvId: 'vidsrc' | 'apiplayer' | 'autoembed' | 'vidsrcpro' | 'embed2') => {
     setActiveServer(srvId);
     if (show) {
       updatePlayerUrl(show, srvId, currentSeasonNum, currentEpisodeNum);

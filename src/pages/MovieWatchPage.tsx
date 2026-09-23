@@ -11,14 +11,14 @@ export const MovieWatchPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<NormalizedMedia | null>(null);
   const [recommendations, setRecommendations] = useState<NormalizedMedia[]>([]);
-  const [activeServer, setActiveServer] = useState<'embedsu' | 'apiplayer' | 'vidsrc' | 'vidsrcpro' | 'autoembed' | 'embed2'>('embedsu');
+  const [activeServer, setActiveServer] = useState<'vidsrc' | 'apiplayer' | 'autoembed' | 'vidsrcpro' | 'embed2'>('vidsrc');
   const [playerUrl, setPlayerUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [playerError, setPlayerError] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const updatePlayerUrl = useCallback((mediaObj: NormalizedMedia, serverId: 'embedsu' | 'apiplayer' | 'vidsrc' | 'vidsrcpro' | 'autoembed' | 'embed2') => {
+  const updatePlayerUrl = useCallback((mediaObj: NormalizedMedia, serverId: 'vidsrc' | 'apiplayer' | 'autoembed' | 'vidsrcpro' | 'embed2') => {
     const url = getPlaybackUrl(mediaObj, { server: serverId });
     setPlayerUrl(url);
   }, []);
@@ -60,7 +60,7 @@ export const MovieWatchPage: React.FC = () => {
     window.scrollTo(0, 0);
   }, [id]);
 
-  const handleServerChange = (serverId: 'embedsu' | 'apiplayer' | 'vidsrc' | 'vidsrcpro' | 'autoembed' | 'embed2') => {
+  const handleServerChange = (serverId: 'vidsrc' | 'apiplayer' | 'autoembed' | 'vidsrcpro' | 'embed2') => {
     setActiveServer(serverId);
     if (movie) {
       updatePlayerUrl(movie, serverId);

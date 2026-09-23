@@ -19,13 +19,13 @@ export const TVWatchPage: React.FC = () => {
   const [seasonDetails, setSeasonDetails] = useState<SeasonDetails | null>(null);
   const [currentEpisodeObj, setCurrentEpisodeObj] = useState<EpisodeDetails | null>(null);
   const [recommendations, setRecommendations] = useState<NormalizedMedia[]>([]);
-  const [activeServer, setActiveServer] = useState<'vidsrc' | 'apiplayer' | 'autoembed' | 'vidsrcpro' | 'embed2'>('vidsrc');
+  const [activeServer, setActiveServer] = useState<'autoembed' | 'vidsrc' | 'apiplayer' | 'vidsrcpro' | 'embed2' | 'vidsrccc'>('autoembed');
   const [playerUrl, setPlayerUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [playerError, setPlayerError] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
 
-  const updatePlayerUrl = useCallback((mediaObj: NormalizedMedia, srvId: 'vidsrc' | 'apiplayer' | 'autoembed' | 'vidsrcpro' | 'embed2', sNum: number, epNum: number) => {
+  const updatePlayerUrl = useCallback((mediaObj: NormalizedMedia, srvId: 'autoembed' | 'vidsrc' | 'apiplayer' | 'vidsrcpro' | 'embed2' | 'vidsrccc', sNum: number, epNum: number) => {
     const url = getPlaybackUrl(mediaObj, {
       season: sNum,
       episode: epNum,
@@ -87,7 +87,7 @@ export const TVWatchPage: React.FC = () => {
     loadTVWatch();
   }, [id, currentSeasonNum, currentEpisodeNum]);
 
-  const handleServerChange = (srvId: 'vidsrc' | 'apiplayer' | 'autoembed' | 'vidsrcpro' | 'embed2') => {
+  const handleServerChange = (srvId: 'autoembed' | 'vidsrc' | 'apiplayer' | 'vidsrcpro' | 'embed2' | 'vidsrccc') => {
     setActiveServer(srvId);
     if (show) {
       updatePlayerUrl(show, srvId, currentSeasonNum, currentEpisodeNum);
@@ -189,6 +189,7 @@ export const TVWatchPage: React.FC = () => {
               className="w-full h-full border-0"
               allowFullScreen
               allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; clipboard-write; gyroscope"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-pointer-lock"
             />
           )}
         </div>

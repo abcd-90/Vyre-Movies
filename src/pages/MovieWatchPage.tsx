@@ -11,14 +11,14 @@ export const MovieWatchPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<NormalizedMedia | null>(null);
   const [recommendations, setRecommendations] = useState<NormalizedMedia[]>([]);
-  const [activeServer, setActiveServer] = useState<'vidsrc' | 'apiplayer' | 'autoembed' | 'vidsrcpro' | 'embed2'>('vidsrc');
+  const [activeServer, setActiveServer] = useState<'autoembed' | 'vidsrc' | 'apiplayer' | 'vidsrcpro' | 'embed2' | 'vidsrccc'>('autoembed');
   const [playerUrl, setPlayerUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [playerError, setPlayerError] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const updatePlayerUrl = useCallback((mediaObj: NormalizedMedia, serverId: 'vidsrc' | 'apiplayer' | 'autoembed' | 'vidsrcpro' | 'embed2') => {
+  const updatePlayerUrl = useCallback((mediaObj: NormalizedMedia, serverId: 'autoembed' | 'vidsrc' | 'apiplayer' | 'vidsrcpro' | 'embed2' | 'vidsrccc') => {
     const url = getPlaybackUrl(mediaObj, { server: serverId });
     setPlayerUrl(url);
   }, []);
@@ -60,7 +60,7 @@ export const MovieWatchPage: React.FC = () => {
     window.scrollTo(0, 0);
   }, [id]);
 
-  const handleServerChange = (serverId: 'vidsrc' | 'apiplayer' | 'autoembed' | 'vidsrcpro' | 'embed2') => {
+  const handleServerChange = (serverId: 'autoembed' | 'vidsrc' | 'apiplayer' | 'vidsrcpro' | 'embed2' | 'vidsrccc') => {
     setActiveServer(serverId);
     if (movie) {
       updatePlayerUrl(movie, serverId);
@@ -161,6 +161,7 @@ export const MovieWatchPage: React.FC = () => {
               className="w-full h-full border-0"
               allowFullScreen
               allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; clipboard-write; gyroscope"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-pointer-lock"
             />
           )}
         </div>

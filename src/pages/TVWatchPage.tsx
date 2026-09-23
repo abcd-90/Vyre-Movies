@@ -7,8 +7,10 @@ import { CustomSeasonSelect } from '../components/watch/CustomSeasonSelect';
 import { Play, AlertTriangle, RefreshCw, ArrowLeft, Bookmark, Server } from 'lucide-react';
 import { MediaRail } from '../components/rails/MediaRail';
 import { isInWatchlist, toggleWatchlist, saveWatchProgress } from '../lib/storage';
+import { useAdBlocker } from '../lib/useAdBlocker';
 
 export const TVWatchPage: React.FC = () => {
+  useAdBlocker();
   const { id, season = '1', episode = '1' } = useParams<{ id: string; season: string; episode: string }>();
   const navigate = useNavigate();
 
@@ -32,18 +34,6 @@ export const TVWatchPage: React.FC = () => {
       server: srvId,
     });
     setPlayerUrl(url);
-  }, []);
-
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      // Prevent iframe ads from auto-redirecting top window
-      e.preventDefault();
-      return (e.returnValue = '');
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
   }, []);
 
   useEffect(() => {

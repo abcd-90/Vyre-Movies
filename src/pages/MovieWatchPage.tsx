@@ -6,8 +6,10 @@ import type { NormalizedMedia } from '../types/media';
 import { Star, Bookmark, Share2, AlertTriangle, RefreshCw, ArrowLeft, Server } from 'lucide-react';
 import { MediaRail } from '../components/rails/MediaRail';
 import { isInWatchlist, toggleWatchlist, saveWatchProgress } from '../lib/storage';
+import { useAdBlocker } from '../lib/useAdBlocker';
 
 export const MovieWatchPage: React.FC = () => {
+  useAdBlocker();
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<NormalizedMedia | null>(null);
   const [recommendations, setRecommendations] = useState<NormalizedMedia[]>([]);
@@ -21,18 +23,6 @@ export const MovieWatchPage: React.FC = () => {
   const updatePlayerUrl = useCallback((mediaObj: NormalizedMedia, serverId: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer') => {
     const url = getPlaybackUrl(mediaObj, { server: serverId });
     setPlayerUrl(url);
-  }, []);
-
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      // Prevent iframe ads from auto-redirecting top window
-      e.preventDefault();
-      return (e.returnValue = '');
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
   }, []);
 
   useEffect(() => {

@@ -42,7 +42,7 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
   const { season = 1, episode = 1, useImdb = false, server = 'vidsrc', language = 'auto' } = options || {};
   const id = media.tmdbId || media.id;
   const imdb = media.imdbId;
-  const langSuffix = language !== 'auto' ? `&ds_lang=${language}&audio=${language}` : '';
+  const langSuffix = language !== 'auto' ? `&ds_lang=${language}&audio=${language}&sub_lang=${language}&lang=${language}` : '';
 
   // Server 1: VidSrc (100% Working Global HD Stream)
   if (server === 'vidsrc') {
@@ -63,9 +63,9 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
   // Server 3: VidSrc PRO
   if (server === 'vidsrcpro') {
     if (media.type === 'tv') {
-      return `https://vidsrc.pro/embed/tv/${id}/${season}/${episode}${langSuffix ? `?ds_lang=${language}` : ''}`;
+      return `https://vidsrc.pro/embed/tv/${id}/${season}/${episode}${language !== 'auto' ? `?ds_lang=${language}&audio=${language}` : ''}`;
     }
-    return `https://vidsrc.pro/embed/movie/${id}${langSuffix ? `?ds_lang=${language}` : ''}`;
+    return `https://vidsrc.pro/embed/movie/${id}${language !== 'auto' ? `?ds_lang=${language}&audio=${language}` : ''}`;
   }
 
   // Server 4: APIPLAYER

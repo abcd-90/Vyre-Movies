@@ -207,6 +207,21 @@ export const TVWatchPage: React.FC = () => {
             ))}
           </div>
         </div>
+
+        {/* DUBBING AUDIO GUIDANCE NOTICE */}
+        {activeLanguage !== 'auto' && (
+          <div className="p-3 bg-[#171B21] border border-[#D6FF3F]/40 rounded-xl flex items-center gap-2.5 text-xs text-[#F4F5F7] shadow-lg animate-fadeIn">
+            <span className="text-base">💡</span>
+            <div className="space-y-0.5">
+              <p className="font-bold text-[#D6FF3F]">
+                {AUDIO_LANGUAGES.find((l) => l.id === activeLanguage)?.name} Track Requested:
+              </p>
+              <p className="text-[11px] text-[#9BA3AE] leading-relaxed">
+                If the player starts in regional audio, click the <span className="font-bold text-white">⚙️ Settings Icon</span> or <span className="font-bold text-white">💬 Audio/CC</span> inside the player screen (bottom-right) to switch audio stream, or try <span className="font-bold text-[#D6FF3F]">Server 2 / Server 3</span> above.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

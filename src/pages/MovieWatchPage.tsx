@@ -189,14 +189,14 @@ export const MovieWatchPage: React.FC = () => {
 
         {/* DUBBING AUDIO GUIDANCE NOTICE */}
         {activeLanguage !== 'auto' && (
-          <div className="p-3 bg-[#171B21] border border-[#D6FF3F]/40 rounded-xl flex items-center gap-2.5 text-xs text-[#F4F5F7] shadow-lg animate-fadeIn">
-            <span className="text-base">💡</span>
-            <div className="space-y-0.5">
+          <div className="p-3 bg-[#111419] border border-[#D6FF3F]/50 rounded-xl flex items-start gap-3 text-xs text-[#F4F5F7] shadow-lg animate-fadeIn">
+            <span className="text-lg">🔊</span>
+            <div className="space-y-1">
               <p className="font-bold text-[#D6FF3F]">
-                {AUDIO_LANGUAGES.find((l) => l.id === activeLanguage)?.name} Stream Active:
+                {AUDIO_LANGUAGES.find((l) => l.id === activeLanguage)?.name} Track Mode Enabled:
               </p>
               <p className="text-[11px] text-[#9BA3AE] leading-relaxed">
-                Switched to Multi-Audio stream (<span className="font-bold text-[#D6FF3F]">Server 2 / Server 3 / Server 5</span>). If video starts in original audio, click the <span className="font-bold text-white">⚙️ Settings Icon</span> or <span className="font-bold text-white">💬 Audio Track</span> inside the player screen (bottom right) to pick your preferred audio track.
+                Stream parameters updated. Multi-Audio servers (like <span className="font-bold text-[#D6FF3F]">Server 3 - 2Embed VIP</span> or <span className="font-bold text-[#D6FF3F]">Server 4 - VidSrc PM</span>) hold multi-dubbed audio tracks. If video starts in original language, click the <span className="font-bold text-white">⚙️ Settings Icon</span> or <span className="font-bold text-white">💬 Audio Track</span> inside the video player controls (bottom-right) to select your preferred language!
               </p>
             </div>
           </div>

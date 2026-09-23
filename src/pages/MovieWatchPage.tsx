@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getMovieDetails, getRecommendations } from '../lib/providers/tmdb';
-import { getPlaybackUrl, isAllowedPlaybackUrl } from '../lib/providers/player';
+import { getPlaybackUrl, PLAYER_SERVERS } from '../lib/providers/player';
 import type { NormalizedMedia } from '../types/media';
-import { Star, Bookmark, Share2, AlertTriangle, RefreshCw, ArrowLeft } from 'lucide-react';
+import { Star, Bookmark, Share2, AlertTriangle, RefreshCw, ArrowLeft, Server } from 'lucide-react';
 import { MediaRail } from '../components/rails/MediaRail';
 import { isInWatchlist, toggleWatchlist, saveWatchProgress } from '../lib/storage';
 
@@ -11,11 +11,17 @@ export const MovieWatchPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<NormalizedMedia | null>(null);
   const [recommendations, setRecommendations] = useState<NormalizedMedia[]>([]);
+  const [activeServer, setActiveServer] = useState<'embedsu' | 'apiplayer' | 'vidsrc' | 'vidsrcpro' | 'autoembed' | 'embed2'>('embedsu');
   const [playerUrl, setPlayerUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [playerError, setPlayerError] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  const updatePlayerUrl = useCallback((mediaObj: NormalizedMedia, serverId: 'embedsu' | 'apiplayer' | 'vidsrc' | 'vidsrcpro' | 'autoembed' | 'embed2') => {
+    const url = getPlaybackUrl(mediaObj, { server: serverId });
+    setPlayerUrl(url);
+  }, []);
 
   useEffect(() => {
     async function loadMovieAndPlayer() {
@@ -27,12 +33,7 @@ export const MovieWatchPage: React.FC = () => {
         setMovie(details);
         if (details) {
           setInWatchlist(isInWatchlist(details.id, 'movie'));
-          const url = getPlaybackUrl(details);
-          if (isAllowedPlaybackUrl(url)) {
-            setPlayerUrl(url);
-          } else {
-            setPlayerUrl(url);
-          }
+          updatePlayerUrl(details, activeServer);
 
           saveWatchProgress({
             mediaId: details.id,
@@ -58,6 +59,13 @@ export const MovieWatchPage: React.FC = () => {
     loadMovieAndPlayer();
     window.scrollTo(0, 0);
   }, [id]);
+
+  const handleServerChange = (serverId: 'embedsu' | 'apiplayer' | 'vidsrc' | 'vidsrcpro' | 'autoembed' | 'embed2') => {
+    setActiveServer(serverId);
+    if (movie) {
+      updatePlayerUrl(movie, serverId);
+    }
+  };
 
   const handleWatchlistToggle = () => {
     if (!movie) return;
@@ -92,8 +100,9 @@ export const MovieWatchPage: React.FC = () => {
   }
 
   return (
-    <div className="pt-20 sm:pt-24 pb-16 space-y-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="pt-20 sm:pt-24 pb-16 space-y-6">
+      {/* Top Header Controls */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         <Link
           to={`/movie/${movie.id}`}
           className="inline-flex items-center gap-2 text-xs font-bold text-[#9BA3AE] hover:text-[#D6FF3F] transition-colors"
@@ -102,6 +111,32 @@ export const MovieWatchPage: React.FC = () => {
         </Link>
       </div>
 
+      {/* SERVER SELECTION BAR */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-[#111419] border border-[#292F37] p-3 rounded-2xl">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#F4F5F7]">
+            <Server className="w-4 h-4 text-[#D6FF3F]" />
+            <span>STREAM SERVER:</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {PLAYER_SERVERS.map((srv) => (
+              <button
+                key={srv.id}
+                onClick={() => handleServerChange(srv.id)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  activeServer === srv.id
+                    ? 'bg-[#D6FF3F] text-[#0B0D10] shadow-sm'
+                    : 'bg-[#171B21] text-[#9BA3AE] hover:text-[#F4F5F7] border border-[#292F37]'
+                }`}
+              >
+                {srv.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* PLAYER CONTAINER */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative w-full aspect-video bg-black rounded-2xl border border-[#292F37] overflow-hidden shadow-2xl">
           {playerError ? (
@@ -109,28 +144,29 @@ export const MovieWatchPage: React.FC = () => {
               <AlertTriangle className="w-10 h-10 text-[#D6FF3F]" />
               <h3 className="text-base font-bold text-[#F4F5F7]">Playback Couldn't Be Loaded</h3>
               <p className="text-xs text-[#9BA3AE] max-w-sm">
-                The streaming server encountered a temporary connection issue.
+                Try switching to Server 2 or Server 3 above.
               </p>
               <button
                 onClick={() => window.location.reload()}
                 className="px-4 py-2 bg-[#D6FF3F] text-[#0B0D10] font-bold text-xs rounded-xl flex items-center gap-2 hover:scale-105 transition-all"
               >
-                <RefreshCw className="w-3.5 h-3.5" /> Retry Playback
+                <RefreshCw className="w-3.5 h-3.5" /> Retry Stream
               </button>
             </div>
           ) : (
             <iframe
+              key={playerUrl}
               src={playerUrl}
               title={movie.title}
               className="w-full h-full border-0"
               allowFullScreen
-              allow="autoplay; encrypted-media; picture-in-picture"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; clipboard-write; gyroscope"
             />
           )}
         </div>
       </div>
 
+      {/* MOVIE METADATA UNDER PLAYER */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#292F37] pb-6">
           <div className="space-y-2">
@@ -196,6 +232,7 @@ export const MovieWatchPage: React.FC = () => {
         </div>
       </div>
 
+      {/* RELATED CONTENT */}
       {recommendations.length > 0 && (
         <MediaRail title="You May Also Like" items={recommendations} />
       )}

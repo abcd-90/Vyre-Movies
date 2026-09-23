@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getTVDetails, getTVSeasonDetails, getRecommendations } from '../lib/providers/tmdb';
-import { getPlaybackUrl } from '../lib/providers/player';
+import { getPlaybackUrl, PLAYER_SERVERS } from '../lib/providers/player';
 import type { NormalizedMedia, SeasonDetails, EpisodeDetails } from '../types/media';
 import { CustomSeasonSelect } from '../components/watch/CustomSeasonSelect';
-import { Play, AlertTriangle, RefreshCw, ArrowLeft, Bookmark } from 'lucide-react';
+import { Play, AlertTriangle, RefreshCw, ArrowLeft, Bookmark, Server } from 'lucide-react';
 import { MediaRail } from '../components/rails/MediaRail';
 import { isInWatchlist, toggleWatchlist, saveWatchProgress } from '../lib/storage';
 
@@ -19,10 +19,20 @@ export const TVWatchPage: React.FC = () => {
   const [seasonDetails, setSeasonDetails] = useState<SeasonDetails | null>(null);
   const [currentEpisodeObj, setCurrentEpisodeObj] = useState<EpisodeDetails | null>(null);
   const [recommendations, setRecommendations] = useState<NormalizedMedia[]>([]);
+  const [activeServer, setActiveServer] = useState<'embedsu' | 'apiplayer' | 'vidsrc' | 'vidsrcpro' | 'autoembed' | 'embed2'>('embedsu');
   const [playerUrl, setPlayerUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [playerError, setPlayerError] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
+
+  const updatePlayerUrl = useCallback((mediaObj: NormalizedMedia, srvId: 'embedsu' | 'apiplayer' | 'vidsrc' | 'vidsrcpro' | 'autoembed' | 'embed2', sNum: number, epNum: number) => {
+    const url = getPlaybackUrl(mediaObj, {
+      season: sNum,
+      episode: epNum,
+      server: srvId,
+    });
+    setPlayerUrl(url);
+  }, []);
 
   useEffect(() => {
     async function loadTVWatch() {
@@ -34,12 +44,7 @@ export const TVWatchPage: React.FC = () => {
         setShow(details);
         if (details) {
           setInWatchlist(isInWatchlist(details.id, 'tv'));
-
-          const url = getPlaybackUrl(details, {
-            season: currentSeasonNum,
-            episode: currentEpisodeNum,
-          });
-          setPlayerUrl(url);
+          updatePlayerUrl(details, activeServer, currentSeasonNum, currentEpisodeNum);
 
           const seasonData = await getTVSeasonDetails(details.id, currentSeasonNum);
           setSeasonDetails(seasonData);
@@ -82,6 +87,13 @@ export const TVWatchPage: React.FC = () => {
     loadTVWatch();
   }, [id, currentSeasonNum, currentEpisodeNum]);
 
+  const handleServerChange = (srvId: 'embedsu' | 'apiplayer' | 'vidsrc' | 'vidsrcpro' | 'autoembed' | 'embed2') => {
+    setActiveServer(srvId);
+    if (show) {
+      updatePlayerUrl(show, srvId, currentSeasonNum, currentEpisodeNum);
+    }
+  };
+
   const handleSelectSeason = (newSeasonNum: number) => {
     if (!id) return;
     navigate(`/watch/tv/${id}/${newSeasonNum}/1`);
@@ -118,7 +130,7 @@ export const TVWatchPage: React.FC = () => {
   }
 
   return (
-    <div className="pt-20 sm:pt-24 pb-16 space-y-8">
+    <div className="pt-20 sm:pt-24 pb-16 space-y-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Link
           to={`/tv/${show.id}`}
@@ -128,6 +140,31 @@ export const TVWatchPage: React.FC = () => {
         </Link>
       </div>
 
+      {/* STREAM SERVER SELECTION BAR */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-[#111419] border border-[#292F37] p-3 rounded-2xl">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#F4F5F7]">
+            <Server className="w-4 h-4 text-[#D6FF3F]" />
+            <span>STREAM SERVER:</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {PLAYER_SERVERS.map((srv) => (
+              <button
+                key={srv.id}
+                onClick={() => handleServerChange(srv.id)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  activeServer === srv.id
+                    ? 'bg-[#D6FF3F] text-[#0B0D10] shadow-sm'
+                    : 'bg-[#171B21] text-[#9BA3AE] hover:text-[#F4F5F7] border border-[#292F37]'
+                }`}
+              >
+                {srv.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative w-full aspect-video bg-black rounded-2xl border border-[#292F37] overflow-hidden shadow-2xl">
           {playerError ? (
@@ -135,7 +172,7 @@ export const TVWatchPage: React.FC = () => {
               <AlertTriangle className="w-10 h-10 text-[#D6FF3F]" />
               <h3 className="text-base font-bold text-[#F4F5F7]">Playback Couldn't Be Loaded</h3>
               <p className="text-xs text-[#9BA3AE] max-w-sm">
-                The streaming server encountered a temporary connection issue.
+                Try switching to Server 2, 3 or 4 above.
               </p>
               <button
                 onClick={() => window.location.reload()}
@@ -146,12 +183,12 @@ export const TVWatchPage: React.FC = () => {
             </div>
           ) : (
             <iframe
+              key={playerUrl}
               src={playerUrl}
               title={`${show.title} S${currentSeasonNum} E${currentEpisodeNum}`}
               className="w-full h-full border-0"
               allowFullScreen
-              allow="autoplay; encrypted-media; picture-in-picture"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; clipboard-write; gyroscope"
             />
           )}
         </div>

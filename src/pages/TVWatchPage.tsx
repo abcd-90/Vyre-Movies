@@ -108,8 +108,8 @@ export const TVWatchPage: React.FC = () => {
     setActiveLanguage(langId);
     let targetServer = activeServer;
     if (langId !== 'auto' && activeServer === 'vidsrc') {
-      targetServer = 'vidlink';
-      setActiveServer('vidlink');
+      targetServer = 'vidsrcto';
+      setActiveServer('vidsrcto');
     }
     if (show) {
       updatePlayerUrl(show, targetServer, currentSeasonNum, currentEpisodeNum, langId);
@@ -253,7 +253,6 @@ export const TVWatchPage: React.FC = () => {
               className="w-full h-full border-0"
               allowFullScreen
               allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; clipboard-write; gyroscope"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-pointer-lock"
               referrerPolicy="no-referrer"
             />
           )}

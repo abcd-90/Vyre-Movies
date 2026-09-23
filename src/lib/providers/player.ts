@@ -1,6 +1,6 @@
 import type { NormalizedMedia } from '../../types/media';
 
-export type ServerId = 'vidsrc' | 'vidlink' | 'smashy' | 'autoembed' | 'multiembed' | 'vidsrcicu';
+export type ServerId = 'vidsrc' | 'vidsrcto' | 'autoembed' | 'vidsrcpm' | 'embed2' | 'vidsrcio';
 
 export interface PlaybackOptions {
   season?: number;
@@ -17,11 +17,11 @@ export interface PlayerServer {
 
 export const PLAYER_SERVERS: PlayerServer[] = [
   { id: 'vidsrc', name: 'Server 1 (VidSrc Fast HD)' },
-  { id: 'vidlink', name: 'Server 2 (VidLink - Multi Audio Dub)' },
-  { id: 'smashy', name: 'Server 3 (SmashyStream - Hindi/Dual Audio)' },
-  { id: 'autoembed', name: 'Server 4 (AutoEmbed Fast)' },
-  { id: 'multiembed', name: 'Server 5 (SuperEmbed - Multi Audio)' },
-  { id: 'vidsrcicu', name: 'Server 6 (VidSrc ICU Ultra)' },
+  { id: 'vidsrcto', name: 'Server 2 (VidSrc TO - Multi Audio)' },
+  { id: 'autoembed', name: 'Server 3 (AutoEmbed Ultra)' },
+  { id: 'vidsrcpm', name: 'Server 4 (VidSrc PM - Hindi/Dual Audio)' },
+  { id: 'embed2', name: 'Server 5 (2Embed VIP)' },
+  { id: 'vidsrcio', name: 'Server 6 (VidSrc IO Backup)' },
 ];
 
 export interface AudioLanguage {
@@ -45,7 +45,7 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
 
   let rawUrl = '';
 
-  // Server 1: VidSrc
+  // Server 1: VidSrc (vidsrc.me)
   if (server === 'vidsrc') {
     if (media.type === 'tv') {
       rawUrl = `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
@@ -53,23 +53,15 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
       rawUrl = `https://vidsrc.me/embed/movie?tmdb=${id}`;
     }
   }
-  // Server 2: VidLink (Multi-Audio & Dubbed HD)
-  else if (server === 'vidlink') {
+  // Server 2: VidSrc TO (vidsrc.to - Multi Audio & Dubbed)
+  else if (server === 'vidsrcto') {
     if (media.type === 'tv') {
-      rawUrl = `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=d6ff3f&secondaryColor=171b21&iconColor=d6ff3f`;
+      rawUrl = `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`;
     } else {
-      rawUrl = `https://vidlink.pro/movie/${id}?primaryColor=d6ff3f&secondaryColor=171b21&iconColor=d6ff3f`;
+      rawUrl = `https://vidsrc.to/embed/movie/${id}`;
     }
   }
-  // Server 3: SmashyStream (Dual Audio / Hindi Dubbed)
-  else if (server === 'smashy') {
-    if (media.type === 'tv') {
-      rawUrl = `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${season}&episode=${episode}`;
-    } else {
-      rawUrl = `https://embed.smashystream.com/playere.php?tmdb=${id}`;
-    }
-  }
-  // Server 4: AutoEmbed
+  // Server 3: AutoEmbed (autoembed.co)
   else if (server === 'autoembed') {
     if (media.type === 'tv') {
       rawUrl = `https://autoembed.co/tv/tmdb/${id}-${season}-${episode}`;
@@ -77,20 +69,28 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
       rawUrl = `https://autoembed.co/movie/tmdb/${id}`;
     }
   }
-  // Server 5: MultiEmbed (SuperEmbed with built-in Audio selector)
-  else if (server === 'multiembed') {
+  // Server 4: VidSrc PM (vidsrc.pm - Dual Audio)
+  else if (server === 'vidsrcpm') {
     if (media.type === 'tv') {
-      rawUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
+      rawUrl = `https://vidsrc.pm/embed/tv/${id}/${season}/${episode}`;
     } else {
-      rawUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`;
+      rawUrl = `https://vidsrc.pm/embed/movie/${id}`;
     }
   }
-  // Server 6: VidSrc ICU
-  else if (server === 'vidsrcicu') {
+  // Server 5: 2Embed (2embed.cc)
+  else if (server === 'embed2') {
     if (media.type === 'tv') {
-      rawUrl = `https://vidsrc.icu/embed/tv/${id}/${season}/${episode}`;
+      rawUrl = `https://www.2embed.cc/embedtv/${id}?s=${season}&e=${episode}`;
     } else {
-      rawUrl = `https://vidsrc.icu/embed/movie/${id}`;
+      rawUrl = `https://www.2embed.cc/embed/${id}`;
+    }
+  }
+  // Server 6: VidSrc IO (vidsrc.io)
+  else if (server === 'vidsrcio') {
+    if (media.type === 'tv') {
+      rawUrl = `https://vidsrc.io/embed/tv/${id}/${season}/${episode}`;
+    } else {
+      rawUrl = `https://vidsrc.io/embed/movie/${id}`;
     }
   }
   // Fallback
@@ -115,23 +115,15 @@ export function isAllowedPlaybackUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
     const allowedHosts = [
-      'apiplayer.ru',
-      'www.apiplayer.ru',
       'vidsrc.me',
       'vidsrc.to',
-      'vidsrc.pro',
-      'vidsrc.cc',
-      'vidsrc.icu',
-      '2embed.org',
+      'vidsrc.pm',
+      'vidsrc.io',
+      'vidsrc.dev',
       '2embed.cc',
       'www.2embed.cc',
-      'vidlink.pro',
-      'autoembed.cc',
       'autoembed.co',
       'player.autoembed.cc',
-      'smashystream.com',
-      'embed.smashystream.com',
-      'multiembed.mov',
     ];
     return allowedHosts.some((host) => parsed.hostname.toLowerCase().endsWith(host));
   } catch (e) {

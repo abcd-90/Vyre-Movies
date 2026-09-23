@@ -76,11 +76,10 @@ export const MovieWatchPage: React.FC = () => {
 
   const handleLanguageChange = (langId: 'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml') => {
     setActiveLanguage(langId);
-    // Auto switch to multi-audio server (VidLink or SmashyStream or MultiEmbed) if on Server 1
     let targetServer = activeServer;
     if (langId !== 'auto' && activeServer === 'vidsrc') {
-      targetServer = 'vidlink';
-      setActiveServer('vidlink');
+      targetServer = 'vidsrcto';
+      setActiveServer('vidsrcto');
     }
     if (movie) {
       updatePlayerUrl(movie, targetServer, langId);
@@ -223,7 +222,6 @@ export const MovieWatchPage: React.FC = () => {
               className="w-full h-full border-0"
               allowFullScreen
               allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; clipboard-write; gyroscope"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-pointer-lock"
               referrerPolicy="no-referrer"
             />
           )}

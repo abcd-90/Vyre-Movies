@@ -16,11 +16,11 @@ export interface PlayerServer {
 }
 
 export const PLAYER_SERVERS: PlayerServer[] = [
-  { id: 'vidsrc', name: 'Server 1 (VidSrc ME - Fast HD)' },
-  { id: 'autoembed', name: 'Server 2 (AutoEmbed - Fast)' },
-  { id: 'embed2', name: 'Server 3 (2Embed VIP - Multi Audio)' },
+  { id: 'vidsrc', name: 'Server 1 (VidSrc HD - Multi Audio)' },
+  { id: 'autoembed', name: 'Server 2 (AutoEmbed - Hindi/Multi Audio)' },
+  { id: 'embed2', name: 'Server 3 (2Embed VIP - Dual Audio)' },
   { id: 'vidsrcpm', name: 'Server 4 (VidSrc PM - Dubbed Stream)' },
-  { id: 'vidsrcio', name: 'Server 5 (VidSrc IO - Backup)' },
+  { id: 'vidsrcio', name: 'Server 5 (VidSrc IO - Multi Track)' },
 ];
 
 export interface AudioLanguage {
@@ -98,7 +98,7 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
 
   if (language !== 'auto') {
     const hasQuery = rawUrl.includes('?');
-    const langParams = `ds_lang=${language}&audio=${language}&sub_lang=${language}&lang=${language}`;
+    const langParams = `ds_lang=${language}&audio=${language}&sub_lang=${language}&lang=${language}&audio_lang=${language}&dub=${language}&dubbed=true`;
     return `${rawUrl}${hasQuery ? '&' : '?'}${langParams}`;
   }
 

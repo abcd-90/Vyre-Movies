@@ -221,14 +221,14 @@ export const TVWatchPage: React.FC = () => {
 
         {/* DUBBING AUDIO GUIDANCE NOTICE */}
         {activeLanguage !== 'auto' && (
-          <div className="p-3 bg-[#111419] border border-[#D6FF3F]/50 rounded-xl flex items-start gap-3 text-xs text-[#F4F5F7] shadow-lg animate-fadeIn">
-            <span className="text-lg">🔊</span>
+          <div className="p-3.5 bg-[#111419] border border-[#D6FF3F]/60 rounded-xl flex items-start gap-3 text-xs text-[#F4F5F7] shadow-xl animate-fadeIn">
+            <span className="text-xl">🇵🇰 / 🇮🇳 🔊</span>
             <div className="space-y-1">
-              <p className="font-bold text-[#D6FF3F]">
-                {AUDIO_LANGUAGES.find((l) => l.id === activeLanguage)?.name} Track Mode Enabled:
+              <p className="font-extrabold text-[#D6FF3F] uppercase tracking-wider text-[11px]">
+                {AUDIO_LANGUAGES.find((l) => l.id === activeLanguage)?.name} Stream Active
               </p>
               <p className="text-[11px] text-[#9BA3AE] leading-relaxed">
-                Stream parameters updated. Multi-Audio servers (like <span className="font-bold text-[#D6FF3F]">Server 3 - 2Embed VIP</span> or <span className="font-bold text-[#D6FF3F]">Server 4 - VidSrc PM</span>) hold multi-dubbed audio tracks. If video starts in original language, click the <span className="font-bold text-white">⚙️ Settings Icon</span> or <span className="font-bold text-white">💬 Audio Track</span> inside the video player controls (bottom-right) to select your preferred language!
+                Stream parameters passed to player. If video plays in original audio, click the <span className="font-bold text-white">⚙️ Settings Icon</span> or <span className="font-bold text-white">💬 Audio</span> icon inside the video player controls (bottom right) to pick <span className="font-bold text-[#D6FF3F]">Hindi / Dubbed Track</span>, or try <span className="font-bold text-[#D6FF3F]">Server 3 (2Embed)</span> & <span className="font-bold text-[#D6FF3F]">Server 4 (VidSrc PM)</span>!
               </p>
             </div>
           </div>

@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-obsidian: #0B0D10;
+    --color-carbon: #111419;
+    --color-surface: #171B21;
+    --color-elevated: #1D2229;
+    --color-border-dark: #292F37;
+    --color-vyre-lime: #D6FF3F;
+    --color-vyre-highlight: #E7EBF0;
+    --color-vyre-text-primary: #F4F5F7;
+    --color-vyre-text-secondary: #9BA3AE;
+    --color-vyre-text-muted: #626A75;
+  }
+
+  body {
+    background-color: var(--color-obsidian);
+    color: var(--color-vyre-text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0D10;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #292F37;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3B434F;
+}
+
+/* Hide scrollbar for horizontal rails */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Skeleton shimmer animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #171B21 25%, #232932 50%, #171B21 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* Custom card lift utility */
+.card-lift {
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.card-lift:hover {
+  transform: translateY(-4px);
+  border-color: rgba(214, 255, 63, 0.4);
+}

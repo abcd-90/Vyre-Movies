@@ -1,6 +1,6 @@
 import type { NormalizedMedia } from '../../types/media';
 
-export type ServerId = 'vidsrc' | 'vidsrcto' | 'autoembed' | 'vidsrcpm' | 'embed2' | 'vidsrcio';
+export type ServerId = 'autoembed' | 'vidsrc' | 'embed2' | 'vidsrcin' | 'vidsrcpm' | 'vidsrcio';
 
 export interface PlaybackOptions {
   season?: number;
@@ -16,12 +16,12 @@ export interface PlayerServer {
 }
 
 export const PLAYER_SERVERS: PlayerServer[] = [
-  { id: 'vidsrc', name: 'Server 1 (VidSrc Fast HD)' },
-  { id: 'vidsrcto', name: 'Server 2 (VidSrc TO - Multi Audio)' },
-  { id: 'autoembed', name: 'Server 3 (AutoEmbed Ultra)' },
-  { id: 'vidsrcpm', name: 'Server 4 (VidSrc PM - Hindi/Dual Audio)' },
-  { id: 'embed2', name: 'Server 5 (2Embed VIP)' },
-  { id: 'vidsrcio', name: 'Server 6 (VidSrc IO Backup)' },
+  { id: 'autoembed', name: 'Server 1 (AutoEmbed Ultra - Ad Free)' },
+  { id: 'vidsrc', name: 'Server 2 (VidSrc HD - Multi Audio)' },
+  { id: 'embed2', name: 'Server 3 (2Embed VIP - Dubbed)' },
+  { id: 'vidsrcin', name: 'Server 4 (VidSrc IN - Hindi/Dual)' },
+  { id: 'vidsrcpm', name: 'Server 5 (VidSrc PM - Fast)' },
+  { id: 'vidsrcio', name: 'Server 6 (VidSrc IO - Backup)' },
 ];
 
 export interface AudioLanguage {
@@ -40,49 +40,49 @@ export const AUDIO_LANGUAGES: AudioLanguage[] = [
 ];
 
 export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions): string {
-  const { season = 1, episode = 1, server = 'vidsrc', language = 'auto' } = options || {};
+  const { season = 1, episode = 1, server = 'autoembed', language = 'auto' } = options || {};
   const id = media.tmdbId || media.id;
 
   let rawUrl = '';
 
-  // Server 1: VidSrc (vidsrc.me)
-  if (server === 'vidsrc') {
-    if (media.type === 'tv') {
-      rawUrl = `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
-    } else {
-      rawUrl = `https://vidsrc.me/embed/movie?tmdb=${id}`;
-    }
-  }
-  // Server 2: VidSrc TO (vidsrc.to - Multi Audio & Dubbed)
-  else if (server === 'vidsrcto') {
-    if (media.type === 'tv') {
-      rawUrl = `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`;
-    } else {
-      rawUrl = `https://vidsrc.to/embed/movie/${id}`;
-    }
-  }
-  // Server 3: AutoEmbed (autoembed.co)
-  else if (server === 'autoembed') {
+  // Server 1: AutoEmbed Ultra (autoembed.co - Cleanest, zero popups)
+  if (server === 'autoembed') {
     if (media.type === 'tv') {
       rawUrl = `https://autoembed.co/tv/tmdb/${id}-${season}-${episode}`;
     } else {
       rawUrl = `https://autoembed.co/movie/tmdb/${id}`;
     }
   }
-  // Server 4: VidSrc PM (vidsrc.pm - Dual Audio)
-  else if (server === 'vidsrcpm') {
+  // Server 2: VidSrc HD (vidsrc.me)
+  else if (server === 'vidsrc') {
     if (media.type === 'tv') {
-      rawUrl = `https://vidsrc.pm/embed/tv/${id}/${season}/${episode}`;
+      rawUrl = `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
     } else {
-      rawUrl = `https://vidsrc.pm/embed/movie/${id}`;
+      rawUrl = `https://vidsrc.me/embed/movie?tmdb=${id}`;
     }
   }
-  // Server 5: 2Embed (2embed.cc)
+  // Server 3: 2Embed VIP (2embed.cc)
   else if (server === 'embed2') {
     if (media.type === 'tv') {
       rawUrl = `https://www.2embed.cc/embedtv/${id}?s=${season}&e=${episode}`;
     } else {
       rawUrl = `https://www.2embed.cc/embed/${id}`;
+    }
+  }
+  // Server 4: VidSrc IN (vidsrc.in - Hindi / Dual Audio)
+  else if (server === 'vidsrcin') {
+    if (media.type === 'tv') {
+      rawUrl = `https://vidsrc.in/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
+    } else {
+      rawUrl = `https://vidsrc.in/embed/movie?tmdb=${id}`;
+    }
+  }
+  // Server 5: VidSrc PM (vidsrc.pm)
+  else if (server === 'vidsrcpm') {
+    if (media.type === 'tv') {
+      rawUrl = `https://vidsrc.pm/embed/tv/${id}/${season}/${episode}`;
+    } else {
+      rawUrl = `https://vidsrc.pm/embed/movie/${id}`;
     }
   }
   // Server 6: VidSrc IO (vidsrc.io)
@@ -96,9 +96,9 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
   // Fallback
   else {
     if (media.type === 'tv') {
-      rawUrl = `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
+      rawUrl = `https://autoembed.co/tv/tmdb/${id}-${season}-${episode}`;
     } else {
-      rawUrl = `https://vidsrc.me/embed/movie?tmdb=${id}`;
+      rawUrl = `https://autoembed.co/movie/tmdb/${id}`;
     }
   }
 
@@ -116,10 +116,9 @@ export function isAllowedPlaybackUrl(url: string): boolean {
     const parsed = new URL(url);
     const allowedHosts = [
       'vidsrc.me',
-      'vidsrc.to',
+      'vidsrc.in',
       'vidsrc.pm',
       'vidsrc.io',
-      'vidsrc.dev',
       '2embed.cc',
       'www.2embed.cc',
       'autoembed.co',

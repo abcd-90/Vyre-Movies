@@ -21,7 +21,7 @@ export const TVWatchPage: React.FC = () => {
   const [seasonDetails, setSeasonDetails] = useState<SeasonDetails | null>(null);
   const [currentEpisodeObj, setCurrentEpisodeObj] = useState<EpisodeDetails | null>(null);
   const [recommendations, setRecommendations] = useState<NormalizedMedia[]>([]);
-  const [activeServer, setActiveServer] = useState<ServerId>('vidsrc');
+  const [activeServer, setActiveServer] = useState<ServerId>('autoembed');
   const [activeLanguage, setActiveLanguage] = useState<'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml'>('auto');
   const [playerUrl, setPlayerUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -107,9 +107,9 @@ export const TVWatchPage: React.FC = () => {
   const handleLanguageChange = (langId: 'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml') => {
     setActiveLanguage(langId);
     let targetServer = activeServer;
-    if (langId !== 'auto' && activeServer === 'vidsrc') {
-      targetServer = 'vidsrcto';
-      setActiveServer('vidsrcto');
+    if (langId !== 'auto' && activeServer === 'autoembed') {
+      targetServer = 'vidsrcin';
+      setActiveServer('vidsrcin');
     }
     if (show) {
       updatePlayerUrl(show, targetServer, currentSeasonNum, currentEpisodeNum, langId);
@@ -253,6 +253,7 @@ export const TVWatchPage: React.FC = () => {
               className="w-full h-full border-0"
               allowFullScreen
               allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; clipboard-write; gyroscope"
+              sandbox="allow-scripts allow-same-origin allow-forms"
               referrerPolicy="no-referrer"
             />
           )}

@@ -21,7 +21,7 @@ export const TVWatchPage: React.FC = () => {
   const [seasonDetails, setSeasonDetails] = useState<SeasonDetails | null>(null);
   const [currentEpisodeObj, setCurrentEpisodeObj] = useState<EpisodeDetails | null>(null);
   const [recommendations, setRecommendations] = useState<NormalizedMedia[]>([]);
-  const [activeServer, setActiveServer] = useState<'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer'>('vidsrc');
+  const [activeServer, setActiveServer] = useState<'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer' | 'vidlink' | 'autoembed'>('vidsrc');
   const [activeLanguage, setActiveLanguage] = useState<'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml'>('auto');
   const [playerUrl, setPlayerUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -30,7 +30,7 @@ export const TVWatchPage: React.FC = () => {
 
   const updatePlayerUrl = useCallback((
     mediaObj: NormalizedMedia,
-    srvId: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer',
+    srvId: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer' | 'vidlink' | 'autoembed',
     sNum: number,
     epNum: number,
     langId: 'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml' = activeLanguage
@@ -97,7 +97,7 @@ export const TVWatchPage: React.FC = () => {
     loadTVWatch();
   }, [id, currentSeasonNum, currentEpisodeNum]);
 
-  const handleServerChange = (srvId: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer') => {
+  const handleServerChange = (srvId: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer' | 'vidlink' | 'autoembed') => {
     setActiveServer(srvId);
     if (show) {
       updatePlayerUrl(show, srvId, currentSeasonNum, currentEpisodeNum, activeLanguage);

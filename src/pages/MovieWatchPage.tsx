@@ -13,7 +13,7 @@ export const MovieWatchPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<NormalizedMedia | null>(null);
   const [recommendations, setRecommendations] = useState<NormalizedMedia[]>([]);
-  const [activeServer, setActiveServer] = useState<'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer'>('vidsrc');
+  const [activeServer, setActiveServer] = useState<'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer' | 'vidlink' | 'autoembed'>('vidsrc');
   const [activeLanguage, setActiveLanguage] = useState<'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml'>('auto');
   const [playerUrl, setPlayerUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -23,7 +23,7 @@ export const MovieWatchPage: React.FC = () => {
 
   const updatePlayerUrl = useCallback((
     mediaObj: NormalizedMedia,
-    serverId: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer',
+    serverId: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer' | 'vidlink' | 'autoembed',
     langId: 'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml' = activeLanguage
   ) => {
     const url = getPlaybackUrl(mediaObj, { server: serverId, language: langId });
@@ -67,7 +67,7 @@ export const MovieWatchPage: React.FC = () => {
     window.scrollTo(0, 0);
   }, [id]);
 
-  const handleServerChange = (serverId: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer') => {
+  const handleServerChange = (serverId: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer' | 'vidlink' | 'autoembed') => {
     setActiveServer(serverId);
     if (movie) {
       updatePlayerUrl(movie, serverId, activeLanguage);

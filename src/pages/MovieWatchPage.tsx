@@ -13,21 +13,23 @@ export const MovieWatchPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<NormalizedMedia | null>(null);
   const [recommendations, setRecommendations] = useState<NormalizedMedia[]>([]);
-  const [activeServer, setActiveServer] = useState<ServerId>('autoembed');
-  const [activeLanguage, setActiveLanguage] = useState<'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml'>('auto');
+  const [activeServer, setActiveServer] = useState<ServerId>('vidsrc');
+  const [activeLanguage, setActiveLanguage] = useState<'auto' | 'hi' | 'en' | 'es' | 'fr' | 'ta' | 'te' | 'ml' | 'de'>('auto');
   const [playerUrl, setPlayerUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [playerError, setPlayerError] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [shieldActive, setShieldActive] = useState(true);
 
   const updatePlayerUrl = useCallback((
     mediaObj: NormalizedMedia,
     serverId: ServerId,
-    langId: 'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml' = activeLanguage
+    langId: 'auto' | 'hi' | 'en' | 'es' | 'fr' | 'ta' | 'te' | 'ml' | 'de' = activeLanguage
   ) => {
     const url = getPlaybackUrl(mediaObj, { server: serverId, language: langId });
     setPlayerUrl(url);
+    setShieldActive(true);
   }, [activeLanguage]);
 
   useEffect(() => {
@@ -74,16 +76,20 @@ export const MovieWatchPage: React.FC = () => {
     }
   };
 
-  const handleLanguageChange = (langId: 'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml') => {
+  const handleLanguageChange = (langId: 'auto' | 'hi' | 'en' | 'es' | 'fr' | 'ta' | 'te' | 'ml' | 'de') => {
     setActiveLanguage(langId);
     let targetServer = activeServer;
-    if (langId !== 'auto' && activeServer === 'autoembed') {
-      targetServer = 'vidsrcin';
-      setActiveServer('vidsrcin');
+    if (langId !== 'auto' && activeServer === 'vidsrc') {
+      targetServer = 'embed2';
+      setActiveServer('embed2');
     }
     if (movie) {
       updatePlayerUrl(movie, targetServer, langId);
     }
+  };
+
+  const handleShieldClick = () => {
+    setShieldActive(false);
   };
 
   const handleWatchlistToggle = () => {
@@ -215,16 +221,29 @@ export const MovieWatchPage: React.FC = () => {
               </button>
             </div>
           ) : (
-            <iframe
-              key={playerUrl}
-              src={playerUrl}
-              title={movie.title}
-              className="w-full h-full border-0"
-              allowFullScreen
-              allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; clipboard-write; gyroscope"
-              sandbox="allow-scripts allow-same-origin allow-forms"
-              referrerPolicy="no-referrer"
-            />
+            <>
+              {shieldActive && (
+                <div
+                  onClick={handleShieldClick}
+                  className="absolute inset-0 z-20 bg-black/5 hover:bg-black/10 cursor-pointer flex items-center justify-center transition-colors group/shield"
+                  title="Click once to activate player"
+                >
+                  <div className="px-4 py-2 bg-[#0B0D10]/90 border border-[#D6FF3F]/40 backdrop-blur-md rounded-full text-[11px] font-extrabold text-[#D6FF3F] shadow-2xl flex items-center gap-2 group-hover/shield:scale-105 transition-transform">
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>CLICK ONCE TO START PLAYER (AD-SHIELD ACTIVE)</span>
+                  </div>
+                </div>
+              )}
+              <iframe
+                key={playerUrl}
+                src={playerUrl}
+                title={movie.title}
+                className="w-full h-full border-0"
+                allowFullScreen
+                allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; clipboard-write; gyroscope"
+                referrerPolicy="no-referrer"
+              />
+            </>
           )}
         </div>
       </div>

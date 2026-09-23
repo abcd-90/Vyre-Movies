@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getMovieDetails, getRecommendations } from '../lib/providers/tmdb';
 import { getPlaybackUrl, PLAYER_SERVERS } from '../lib/providers/player';
 import type { NormalizedMedia } from '../types/media';
-import { Star, Bookmark, Share2, AlertTriangle, RefreshCw, ArrowLeft, Server } from 'lucide-react';
+import { Star, Bookmark, Share2, AlertTriangle, RefreshCw, ArrowLeft, Server, ShieldCheck } from 'lucide-react';
 import { MediaRail } from '../components/rails/MediaRail';
 import { isInWatchlist, toggleWatchlist, saveWatchProgress } from '../lib/storage';
 import { useAdBlocker } from '../lib/useAdBlocker';
@@ -111,6 +111,9 @@ export const MovieWatchPage: React.FC = () => {
         >
           <ArrowLeft className="w-4 h-4" /> Back to details
         </Link>
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#171B21] border border-[#D6FF3F]/30 text-[#D6FF3F] rounded-full text-[10px] font-extrabold tracking-wider uppercase">
+          <ShieldCheck className="w-3.5 h-3.5 fill-[#D6FF3F]/20" /> AD-SHIELD PROTECTED
+        </div>
       </div>
 
       {/* SERVER SELECTION BAR */}

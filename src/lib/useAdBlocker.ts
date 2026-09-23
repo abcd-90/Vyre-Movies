@@ -1,30 +1,49 @@
 import { useEffect } from 'react';
 
 /**
- * Custom hook to prevent iframe popups, new tab ad redirects, and unwanted window unloads
- * while keeping embedded video players working smoothly.
+ * Advanced Ad Block & Pop-up Blocker Hook for VYRE
+ * Suppresses external window.open popups, target="_blank" redirects,
+ * and top-level navigation hijacks from free embedded players.
  */
 export function useAdBlocker() {
   useEffect(() => {
-    // 1. Override window.open to suppress popup tabs opened by third-party iframe ads
+    // 1. Override window.open on top window
     const originalOpen = window.open;
-    window.open = function (...args: Parameters<typeof window.open>) {
-      console.warn('Blocked popup ad attempt:', args[0]);
+    window.open = function (url?: string | URL, _target?: string, _features?: string) {
+      console.warn('[VYRE AD-SHIELD] Suppressed popup tab:', url);
       return null;
     };
 
-    // 2. Prevent third-party iframe ads from navigating top window away
+    // 2. Intercept dynamically created <a> elements with target="_blank"
+    const originalCreateElement = document.createElement.bind(document);
+    document.createElement = function (tagName: string, options?: ElementCreationOptions) {
+      const element = originalCreateElement(tagName, options);
+      if (tagName.toLowerCase() === 'a') {
+        const anchor = element as HTMLAnchorElement;
+        const originalClick = anchor.click.bind(anchor);
+        anchor.click = function () {
+          if (anchor.target === '_blank' || anchor.getAttribute('target') === '_blank') {
+            console.warn('[VYRE AD-SHIELD] Blocked <a> tag popup click');
+            return;
+          }
+          return originalClick();
+        };
+      }
+      return element;
+    };
+
+    // 3. Prevent top-level page unload / location hijacking
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
       return (e.returnValue = '');
     };
 
-    // 3. Immediately refocus main window if focus is hijacked by an ad tab
+    // 4. Instantly refocus top window if an ad attempts to steal focus
     const handleBlur = () => {
       if (document.activeElement?.tagName === 'IFRAME') {
         setTimeout(() => {
           window.focus();
-        }, 50);
+        }, 10);
       }
     };
 
@@ -33,6 +52,7 @@ export function useAdBlocker() {
 
     return () => {
       window.open = originalOpen;
+      document.createElement = originalCreateElement;
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('blur', handleBlur);
     };

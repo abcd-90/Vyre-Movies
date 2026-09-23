@@ -1,6 +1,6 @@
 import type { NormalizedMedia } from '../../types/media';
 
-export type ServerId = 'vidsrc' | 'autoembed' | 'embed2' | 'vidsrcpm' | 'vidsrcio';
+export type ServerId = 'vidsrc' | 'autoembed' | 'embed2' | 'smashystream' | 'vidsrcpm' | 'videasy' | 'vidsrcio';
 
 export interface PlaybackOptions {
   season?: number;
@@ -16,11 +16,13 @@ export interface PlayerServer {
 }
 
 export const PLAYER_SERVERS: PlayerServer[] = [
-  { id: 'vidsrc', name: 'Server 1 (VidSrc HD - Multi Audio)' },
-  { id: 'autoembed', name: 'Server 2 (AutoEmbed - Hindi/Multi Audio)' },
-  { id: 'embed2', name: 'Server 3 (2Embed VIP - Dual Audio)' },
-  { id: 'vidsrcpm', name: 'Server 4 (VidSrc PM - Dubbed Stream)' },
-  { id: 'vidsrcio', name: 'Server 5 (VidSrc IO - Multi Track)' },
+  { id: 'vidsrc', name: 'Server 1 (VidSrc HD - Fast Multi-Audio)' },
+  { id: 'autoembed', name: 'Server 2 (AutoEmbed - Hindi/Dual Audio)' },
+  { id: 'embed2', name: 'Server 3 (2Embed VIP - Multi Language)' },
+  { id: 'smashystream', name: 'Server 4 (SmashyStream - Hindi & Dubbed)' },
+  { id: 'vidsrcpm', name: 'Server 5 (VidSrc PM - Dubbed Stream)' },
+  { id: 'videasy', name: 'Server 6 (Videasy - Multi Language)' },
+  { id: 'vidsrcio', name: 'Server 7 (VidSrc IO - Multi Track)' },
 ];
 
 export interface AudioLanguage {
@@ -47,7 +49,7 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
 
   let rawUrl = '';
 
-  // Server 1: VidSrc ME (vidsrc.me - Fast HD)
+  // Server 1: VidSrc ME
   if (server === 'vidsrc') {
     if (media.type === 'tv') {
       rawUrl = `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
@@ -55,7 +57,7 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
       rawUrl = `https://vidsrc.me/embed/movie?tmdb=${id}`;
     }
   }
-  // Server 2: AutoEmbed (autoembed.co)
+  // Server 2: AutoEmbed
   else if (server === 'autoembed') {
     if (media.type === 'tv') {
       rawUrl = `https://autoembed.co/tv/tmdb/${id}-${season}-${episode}`;
@@ -63,7 +65,7 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
       rawUrl = `https://autoembed.co/movie/tmdb/${id}`;
     }
   }
-  // Server 3: 2Embed VIP (2embed.cc)
+  // Server 3: 2Embed VIP
   else if (server === 'embed2') {
     if (media.type === 'tv') {
       rawUrl = `https://www.2embed.cc/embedtv/${id}?s=${season}&e=${episode}`;
@@ -71,7 +73,15 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
       rawUrl = `https://www.2embed.cc/embed/${id}`;
     }
   }
-  // Server 4: VidSrc PM (vidsrc.pm)
+  // Server 4: SmashyStream (Dedicated Hindi / Dubbed Multi-Server)
+  else if (server === 'smashystream') {
+    if (media.type === 'tv') {
+      rawUrl = `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${season}&episode=${episode}`;
+    } else {
+      rawUrl = `https://embed.smashystream.com/playere.php?tmdb=${id}`;
+    }
+  }
+  // Server 5: VidSrc PM
   else if (server === 'vidsrcpm') {
     if (media.type === 'tv') {
       rawUrl = `https://vidsrc.pm/embed/tv/${id}/${season}/${episode}`;
@@ -79,7 +89,15 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
       rawUrl = `https://vidsrc.pm/embed/movie/${id}`;
     }
   }
-  // Server 5: VidSrc IO (vidsrc.io)
+  // Server 6: Videasy
+  else if (server === 'videasy') {
+    if (media.type === 'tv') {
+      rawUrl = `https://player.videasy.net/tv/${id}/${season}/${episode}`;
+    } else {
+      rawUrl = `https://player.videasy.net/movie/${id}`;
+    }
+  }
+  // Server 7: VidSrc IO
   else if (server === 'vidsrcio') {
     if (media.type === 'tv') {
       rawUrl = `https://vidsrc.io/embed/tv/${id}/${season}/${episode}`;
@@ -98,7 +116,7 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
 
   if (language !== 'auto') {
     const hasQuery = rawUrl.includes('?');
-    const langParams = `ds_lang=${language}&audio=${language}&sub_lang=${language}&lang=${language}&audio_lang=${language}&dub=${language}&dubbed=true`;
+    const langParams = `ds_lang=${language}&audio=${language}&sub_lang=${language}&lang=${language}&audio_lang=${language}&dub=${language}&dubbed=true&language=${language}`;
     return `${rawUrl}${hasQuery ? '&' : '?'}${langParams}`;
   }
 
@@ -116,6 +134,10 @@ export function isAllowedPlaybackUrl(url: string): boolean {
       'www.2embed.cc',
       'autoembed.co',
       'player.autoembed.cc',
+      'smashystream.com',
+      'embed.smashystream.com',
+      'videasy.net',
+      'player.videasy.net',
     ];
     return allowedHosts.some((host) => parsed.hostname.toLowerCase().endsWith(host));
   } catch (e) {

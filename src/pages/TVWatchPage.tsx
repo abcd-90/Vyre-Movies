@@ -108,13 +108,8 @@ export const TVWatchPage: React.FC = () => {
 
   const handleLanguageChange = (langId: 'auto' | 'hi' | 'en' | 'es' | 'fr' | 'ta' | 'te' | 'ml' | 'de') => {
     setActiveLanguage(langId);
-    let targetServer = activeServer;
-    if (langId !== 'auto' && activeServer === 'vidsrc') {
-      targetServer = 'embed2';
-      setActiveServer('embed2');
-    }
     if (show) {
-      updatePlayerUrl(show, targetServer, currentSeasonNum, currentEpisodeNum, langId);
+      updatePlayerUrl(show, activeServer, currentSeasonNum, currentEpisodeNum, langId);
     }
   };
 

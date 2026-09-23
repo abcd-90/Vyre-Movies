@@ -78,13 +78,8 @@ export const MovieWatchPage: React.FC = () => {
 
   const handleLanguageChange = (langId: 'auto' | 'hi' | 'en' | 'es' | 'fr' | 'ta' | 'te' | 'ml' | 'de') => {
     setActiveLanguage(langId);
-    let targetServer = activeServer;
-    if (langId !== 'auto' && activeServer === 'vidsrc') {
-      targetServer = 'embed2';
-      setActiveServer('embed2');
-    }
     if (movie) {
-      updatePlayerUrl(movie, targetServer, langId);
+      updatePlayerUrl(movie, activeServer, langId);
     }
   };
 

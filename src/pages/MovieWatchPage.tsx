@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getMovieDetails, getRecommendations } from '../lib/providers/tmdb';
-import { getPlaybackUrl, PLAYER_SERVERS, AUDIO_LANGUAGES } from '../lib/providers/player';
+import { getPlaybackUrl, PLAYER_SERVERS, AUDIO_LANGUAGES, type ServerId } from '../lib/providers/player';
 import type { NormalizedMedia } from '../types/media';
 import { Star, Bookmark, Share2, AlertTriangle, RefreshCw, ArrowLeft, Server, ShieldCheck, Volume2 } from 'lucide-react';
 import { MediaRail } from '../components/rails/MediaRail';
@@ -13,7 +13,7 @@ export const MovieWatchPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<NormalizedMedia | null>(null);
   const [recommendations, setRecommendations] = useState<NormalizedMedia[]>([]);
-  const [activeServer, setActiveServer] = useState<'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer' | 'vidlink' | 'autoembed'>('vidsrc');
+  const [activeServer, setActiveServer] = useState<ServerId>('vidsrc');
   const [activeLanguage, setActiveLanguage] = useState<'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml'>('auto');
   const [playerUrl, setPlayerUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -23,7 +23,7 @@ export const MovieWatchPage: React.FC = () => {
 
   const updatePlayerUrl = useCallback((
     mediaObj: NormalizedMedia,
-    serverId: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer' | 'vidlink' | 'autoembed',
+    serverId: ServerId,
     langId: 'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml' = activeLanguage
   ) => {
     const url = getPlaybackUrl(mediaObj, { server: serverId, language: langId });
@@ -67,7 +67,7 @@ export const MovieWatchPage: React.FC = () => {
     window.scrollTo(0, 0);
   }, [id]);
 
-  const handleServerChange = (serverId: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer' | 'vidlink' | 'autoembed') => {
+  const handleServerChange = (serverId: ServerId) => {
     setActiveServer(serverId);
     if (movie) {
       updatePlayerUrl(movie, serverId, activeLanguage);
@@ -76,8 +76,14 @@ export const MovieWatchPage: React.FC = () => {
 
   const handleLanguageChange = (langId: 'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml') => {
     setActiveLanguage(langId);
+    // Auto switch to multi-audio server (VidLink or SmashyStream or MultiEmbed) if on Server 1
+    let targetServer = activeServer;
+    if (langId !== 'auto' && activeServer === 'vidsrc') {
+      targetServer = 'vidlink';
+      setActiveServer('vidlink');
+    }
     if (movie) {
-      updatePlayerUrl(movie, activeServer, langId);
+      updatePlayerUrl(movie, targetServer, langId);
     }
   };
 
@@ -124,7 +130,7 @@ export const MovieWatchPage: React.FC = () => {
           <ArrowLeft className="w-4 h-4" /> Back to details
         </Link>
         <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#171B21] border border-[#D6FF3F]/30 text-[#D6FF3F] rounded-full text-[10px] font-extrabold tracking-wider uppercase">
-          <ShieldCheck className="w-3.5 h-3.5 fill-[#D6FF3F]/20" /> AD-SHIELD PROTECTED
+          <ShieldCheck className="w-3.5 h-3.5 fill-[#D6FF3F]/20" /> AD-SHIELD PROTECTED (NO POPUPS)
         </div>
       </div>
 
@@ -182,10 +188,10 @@ export const MovieWatchPage: React.FC = () => {
             <span className="text-base">💡</span>
             <div className="space-y-0.5">
               <p className="font-bold text-[#D6FF3F]">
-                {AUDIO_LANGUAGES.find((l) => l.id === activeLanguage)?.name} Track Requested:
+                {AUDIO_LANGUAGES.find((l) => l.id === activeLanguage)?.name} Stream Active:
               </p>
               <p className="text-[11px] text-[#9BA3AE] leading-relaxed">
-                If the player starts in regional audio, click the <span className="font-bold text-white">⚙️ Settings Icon</span> or <span className="font-bold text-white">💬 Audio/CC</span> inside the player screen (bottom-right) to switch audio stream, or try <span className="font-bold text-[#D6FF3F]">Server 2 / Server 3</span> above.
+                Switched to Multi-Audio stream (<span className="font-bold text-[#D6FF3F]">Server 2 / Server 3 / Server 5</span>). If video starts in original audio, click the <span className="font-bold text-white">⚙️ Settings Icon</span> or <span className="font-bold text-white">💬 Audio Track</span> inside the player screen (bottom right) to pick your preferred audio track.
               </p>
             </div>
           </div>
@@ -217,6 +223,8 @@ export const MovieWatchPage: React.FC = () => {
               className="w-full h-full border-0"
               allowFullScreen
               allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; clipboard-write; gyroscope"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-pointer-lock"
+              referrerPolicy="no-referrer"
             />
           )}
         </div>

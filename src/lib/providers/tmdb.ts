@@ -1,6 +1,6 @@
 import type { NormalizedMedia, SeasonDetails, EpisodeDetails, FilterOptions, Genre } from '../../types/media';
 
-const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY || '';
+const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY || '1194f31f73643d6de969014c96d483f4';
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 
@@ -39,8 +39,8 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     type: 'movie',
     title: 'Interstellar',
     tagline: 'Mankind was born on Earth. It was never meant to die here.',
-    poster: '/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
-    backdrop: '/xJHokMbljvjADYdit5fKSuV0Te.jpg',
+    poster: getPosterUrl('/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg'),
+    backdrop: getBackdropUrl('/xJHokMbljvjADYdit5fKSuV0Te.jpg'),
     overview: 'The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage.',
     year: 2014,
     rating: 8.4,
@@ -49,10 +49,10 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     runtime: 169,
     status: 'Released',
     cast: [
-      { id: 10296, name: 'Matthew McConaughey', character: 'Joseph Cooper', profilePath: '/wE33L2c2hE663B5YtS4N9H3V5.jpg' },
-      { id: 1813, name: 'Anne Hathaway', character: 'Dr. Amelia Brand', profilePath: '/tL2n8A2Z60k3mE6a8kG5V34t12.jpg' },
-      { id: 83002, name: 'Jessica Chastain', character: 'Murph Cooper', profilePath: '/x5V3nJ0bV9mJ23a7hH1B5G34.jpg' },
-      { id: 3895, name: 'Michael Caine', character: 'Professor Brand', profilePath: '/bT4s32Jk60vC10z9k5G34.jpg' }
+      { id: 10296, name: 'Matthew McConaughey', character: 'Joseph Cooper', profilePath: getPosterUrl('/wE33L2c2hE663B5YtS4N9H3V5.jpg', 'w342') },
+      { id: 1813, name: 'Anne Hathaway', character: 'Dr. Amelia Brand', profilePath: getPosterUrl('/tL2n8A2Z60k3mE6a8kG5V34t12.jpg', 'w342') },
+      { id: 83002, name: 'Jessica Chastain', character: 'Murph Cooper', profilePath: getPosterUrl('/x5V3nJ0bV9mJ23a7hH1B5G34.jpg', 'w342') },
+      { id: 3895, name: 'Michael Caine', character: 'Professor Brand', profilePath: getPosterUrl('/bT4s32Jk60vC10z9k5G34.jpg', 'w342') }
     ]
   },
   {
@@ -62,8 +62,8 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     type: 'movie',
     title: 'Inception',
     tagline: 'Your mind is the scene of the crime.',
-    poster: '/oYu2T8gZ98vhAxyPWGlDFftxSLs.jpg',
-    backdrop: '/8ZTVqv8Tfr9Gl9vTGlLGi4F6kWD.jpg',
+    poster: getPosterUrl('/oYu2T8gZ98vhAxyPWGlDFftxSLs.jpg'),
+    backdrop: getBackdropUrl('/8ZTVqv8Tfr9Gl9vTGlLGi4F6kWD.jpg'),
     overview: 'Cobb, a skilled thief who steals valuable secrets from deep within the subconscious during the dream state, is offered a chance at redemption if he can perform inception: planting an idea into a target’s mind.',
     year: 2010,
     rating: 8.4,
@@ -72,10 +72,10 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     runtime: 148,
     status: 'Released',
     cast: [
-      { id: 6193, name: 'Leonardo DiCaprio', character: 'Dom Cobb', profilePath: '/wo2hJpn04vbtmh0B9utCFdsQoiM.jpg' },
-      { id: 24045, name: 'Joseph Gordon-Levitt', character: 'Arthur', profilePath: '/dhvHwQhC0bW8yT0L12b9z.jpg' },
-      { id: 27578, name: 'Elliot Page', character: 'Ariadne', profilePath: '/pG10L0x.jpg' },
-      { id: 2524, name: 'Tom Hardy', character: 'Eames', profilePath: '/6A4H46J.jpg' }
+      { id: 6193, name: 'Leonardo DiCaprio', character: 'Dom Cobb', profilePath: getPosterUrl('/wo2hJpn04vbtmh0B9utCFdsQoiM.jpg', 'w342') },
+      { id: 24045, name: 'Joseph Gordon-Levitt', character: 'Arthur', profilePath: getPosterUrl('/dhvHwQhC0bW8yT0L12b9z.jpg', 'w342') },
+      { id: 27578, name: 'Elliot Page', character: 'Ariadne', profilePath: getPosterUrl('/pG10L0x.jpg', 'w342') },
+      { id: 2524, name: 'Tom Hardy', character: 'Eames', profilePath: getPosterUrl('/6A4H46J.jpg', 'w342') }
     ]
   },
   {
@@ -85,8 +85,8 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     type: 'movie',
     title: 'Oppenheimer',
     tagline: 'The world changes forever.',
-    poster: '/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',
-    backdrop: '/rLb2cwF3Pazuxaj0sRXQ037tGI1.jpg',
+    poster: getPosterUrl('/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg'),
+    backdrop: getBackdropUrl('/rLb2cwF3Pazuxaj0sRXQ037tGI1.jpg'),
     overview: 'The story of J. Robert Oppenheimer’s role in the development of the atomic bomb during World War II.',
     year: 2023,
     rating: 8.1,
@@ -95,10 +95,10 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     runtime: 180,
     status: 'Released',
     cast: [
-      { id: 2037, name: 'Cillian Murphy', character: 'J. Robert Oppenheimer', profilePath: '/pP12.jpg' },
-      { id: 5081, name: 'Emily Blunt', character: 'Katherine Oppenheimer', profilePath: '/nL34.jpg' },
-      { id: 1892, name: 'Matt Damon', character: 'Leslie Groves', profilePath: '/mD56.jpg' },
-      { id: 2259, name: 'Robert Downey Jr.', character: 'Lewis Strauss', profilePath: '/rD78.jpg' }
+      { id: 2037, name: 'Cillian Murphy', character: 'J. Robert Oppenheimer', profilePath: getPosterUrl('/pP12.jpg', 'w342') },
+      { id: 5081, name: 'Emily Blunt', character: 'Katherine Oppenheimer', profilePath: getPosterUrl('/nL34.jpg', 'w342') },
+      { id: 1892, name: 'Matt Damon', character: 'Leslie Groves', profilePath: getPosterUrl('/mD56.jpg', 'w342') },
+      { id: 2259, name: 'Robert Downey Jr.', character: 'Lewis Strauss', profilePath: getPosterUrl('/rD78.jpg', 'w342') }
     ]
   },
   {
@@ -108,8 +108,8 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     type: 'movie',
     title: 'Dune: Part Two',
     tagline: 'Long live the fighters.',
-    poster: '/1pdfLPoWBkCGWOSdVFjTLBviMs1.jpg',
-    backdrop: '/xOMo8WhK218AO2hMFiSZjviysOH.jpg',
+    poster: getPosterUrl('/1pdfLPoWBkCGWOSdVFjTLBviMs1.jpg'),
+    backdrop: getBackdropUrl('/xOMo8WhK218AO2hMFiSZjviysOH.jpg'),
     overview: 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.',
     year: 2024,
     rating: 8.2,
@@ -118,9 +118,9 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     runtime: 166,
     status: 'Released',
     cast: [
-      { id: 1190668, name: 'Timothée Chalamet', character: 'Paul Atreides', profilePath: '/tC99.jpg' },
-      { id: 505710, name: 'Zendaya', character: 'Chani', profilePath: '/zD88.jpg' },
-      { id: 9343, name: 'Rebecca Ferguson', character: 'Lady Jessica Atreides', profilePath: '/rF77.jpg' }
+      { id: 1190668, name: 'Timothée Chalamet', character: 'Paul Atreides', profilePath: getPosterUrl('/tC99.jpg', 'w342') },
+      { id: 505710, name: 'Zendaya', character: 'Chani', profilePath: getPosterUrl('/zD88.jpg', 'w342') },
+      { id: 9343, name: 'Rebecca Ferguson', character: 'Lady Jessica Atreides', profilePath: getPosterUrl('/rF77.jpg', 'w342') }
     ]
   },
   {
@@ -130,8 +130,8 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     type: 'tv',
     title: 'Arcane',
     tagline: 'Every legend has a beginning.',
-    poster: '/fqld2gZ1aXy2J2xQ.jpg',
-    backdrop: '/uDgy6hyPd3mATyCtT222.jpg',
+    poster: getPosterUrl('/fqld2gZ1aXy2J2xQ.jpg'),
+    backdrop: getBackdropUrl('/uDgy6hyPd3mATyCtT222.jpg'),
     overview: 'Amid the fraught balance between the rich city of Piltover and the seedy underground of Zaun, two sisters fight on opposite sides of a war between rival technologies and incompatible convictions.',
     year: 2021,
     rating: 8.7,
@@ -141,9 +141,9 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     episodesCount: 18,
     status: 'Ended',
     cast: [
-      { id: 55060, name: 'Hailee Steinfeld', character: 'Vi', profilePath: '/hS11.jpg' },
-      { id: 1642232, name: 'Ella Purnell', character: 'Jinx', profilePath: '/eP22.jpg' },
-      { id: 12519, name: 'Kevin Alejandro', character: 'Jayce Talis', profilePath: '/kA33.jpg' }
+      { id: 55060, name: 'Hailee Steinfeld', character: 'Vi', profilePath: getPosterUrl('/hS11.jpg', 'w342') },
+      { id: 1642232, name: 'Ella Purnell', character: 'Jinx', profilePath: getPosterUrl('/eP22.jpg', 'w342') },
+      { id: 12519, name: 'Kevin Alejandro', character: 'Jayce Talis', profilePath: getPosterUrl('/kA33.jpg', 'w342') }
     ]
   },
   {
@@ -153,8 +153,8 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     type: 'tv',
     title: 'Game of Thrones',
     tagline: 'Winter is coming.',
-    poster: '/1XS1oqL89v2GPyMY13er78xWzCo.jpg',
-    backdrop: '/2OMB0ynKly8enMJWI2Dy9I4vT2x.jpg',
+    poster: getPosterUrl('/1XS1oqL89v2GPyMY13er78xWzCo.jpg'),
+    backdrop: getBackdropUrl('/2OMB0ynKly8enMJWI2Dy9I4vT2x.jpg'),
     overview: 'Seven noble families fight for control of the mythical land of Westeros. Friction between the houses leads to full-scale war.',
     year: 2011,
     rating: 8.4,
@@ -164,9 +164,9 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     episodesCount: 73,
     status: 'Ended',
     cast: [
-      { id: 239014, name: 'Emilia Clarke', character: 'Daenerys Targaryen', profilePath: '/eC11.jpg' },
-      { id: 49735, name: 'Kit Harington', character: 'Jon Snow', profilePath: '/kH22.jpg' },
-      { id: 22970, name: 'Peter Dinklage', character: 'Tyrion Lannister', profilePath: '/pD33.jpg' }
+      { id: 239014, name: 'Emilia Clarke', character: 'Daenerys Targaryen', profilePath: getPosterUrl('/eC11.jpg', 'w342') },
+      { id: 49735, name: 'Kit Harington', character: 'Jon Snow', profilePath: getPosterUrl('/kH22.jpg', 'w342') },
+      { id: 22970, name: 'Peter Dinklage', character: 'Tyrion Lannister', profilePath: getPosterUrl('/pD33.jpg', 'w342') }
     ]
   },
   {
@@ -176,8 +176,8 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     type: 'tv',
     title: 'The Last of Us',
     tagline: 'When you\'re lost in the darkness, look for the light.',
-    poster: '/u3bZgnGQ9T01sWNhyve4z0wH0Hl.jpg',
-    backdrop: '/uDgy6hyPd3mATyCtT222.jpg',
+    poster: getPosterUrl('/u3bZgnGQ9T01sWNhyve4z0wH0Hl.jpg'),
+    backdrop: getBackdropUrl('/uDgy6hyPd3mATyCtT222.jpg'),
     overview: 'Twenty years after modern civilization has been destroyed, Joel, a hardened survivor, is hired to smuggle Ellie, a 14-year-old girl, out of an oppressive quarantine zone.',
     year: 2023,
     rating: 8.6,
@@ -187,8 +187,8 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     episodesCount: 9,
     status: 'Returning Series',
     cast: [
-      { id: 1253360, name: 'Pedro Pascal', character: 'Joel Miller', profilePath: '/pP99.jpg' },
-      { id: 2322502, name: 'Bella Ramsey', character: 'Ellie Williams', profilePath: '/bR88.jpg' }
+      { id: 1253360, name: 'Pedro Pascal', character: 'Joel Miller', profilePath: getPosterUrl('/pP99.jpg', 'w342') },
+      { id: 2322502, name: 'Bella Ramsey', character: 'Ellie Williams', profilePath: getPosterUrl('/bR88.jpg', 'w342') }
     ]
   },
   {
@@ -198,8 +198,8 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     type: 'movie',
     title: 'The Dark Knight',
     tagline: 'Welcome to a world without rules.',
-    poster: '/qJ2tW6WMUDux911r6m7haRef0WH.jpg',
-    backdrop: '/nMK28wyCCm1PjBNahPRGZqsujeL.jpg',
+    poster: getPosterUrl('/qJ2tW6WMUDux911r6m7haRef0WH.jpg'),
+    backdrop: getBackdropUrl('/nMK28wyCCm1PjBNahPRGZqsujeL.jpg'),
     overview: 'Batman raises the stakes in his war on crime. With the help of Lt. Jim Gordon and District Attorney Harvey Dent, Batman sets out to dismantle the remaining criminal organizations that plague the streets.',
     year: 2008,
     rating: 8.5,
@@ -208,9 +208,9 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     runtime: 152,
     status: 'Released',
     cast: [
-      { id: 3894, name: 'Christian Bale', character: 'Bruce Wayne / Batman', profilePath: '/cB11.jpg' },
-      { id: 1810, name: 'Heath Ledger', character: 'Joker', profilePath: '/hL22.jpg' },
-      { id: 6384, name: 'Aaron Eckhart', character: 'Harvey Dent', profilePath: '/aE33.jpg' }
+      { id: 3894, name: 'Christian Bale', character: 'Bruce Wayne / Batman', profilePath: getPosterUrl('/cB11.jpg', 'w342') },
+      { id: 1810, name: 'Heath Ledger', character: 'Joker', profilePath: getPosterUrl('/hL22.jpg', 'w342') },
+      { id: 6384, name: 'Aaron Eckhart', character: 'Harvey Dent', profilePath: getPosterUrl('/aE33.jpg', 'w342') }
     ]
   },
   {
@@ -220,8 +220,8 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     type: 'tv',
     title: 'The Bear',
     tagline: 'Every second counts.',
-    poster: '/sCHJ85XpS9t43iR05bT99j0k3xL.jpg',
-    backdrop: '/k1W9oB2J38t40v2.jpg',
+    poster: getPosterUrl('/sCHJ85XpS9t43iR05bT99j0k3xL.jpg'),
+    backdrop: getBackdropUrl('/k1W9oB2J38t40v2.jpg'),
     overview: 'A young chef from the fine dining world returns to Chicago to run his family’s sandwich shop.',
     year: 2022,
     rating: 8.5,
@@ -231,9 +231,9 @@ const FALLBACK_MEDIA: NormalizedMedia[] = [
     episodesCount: 28,
     status: 'Returning Series',
     cast: [
-      { id: 1478523, name: 'Jeremy Allen White', character: 'Carmen \'Carmy\' Berzatto', profilePath: '/jW11.jpg' },
-      { id: 2548962, name: 'Ayo Edebiri', character: 'Sydney Adamu', profilePath: '/aE22.jpg' },
-      { id: 74589, name: 'Ebon Moss-Bachrach', character: 'Richard \'Richie\' Jerimovich', profilePath: '/eM33.jpg' }
+      { id: 1478523, name: 'Jeremy Allen White', character: 'Carmen \'Carmy\' Berzatto', profilePath: getPosterUrl('/jW11.jpg', 'w342') },
+      { id: 2548962, name: 'Ayo Edebiri', character: 'Sydney Adamu', profilePath: getPosterUrl('/aE22.jpg', 'w342') },
+      { id: 74589, name: 'Ebon Moss-Bachrach', character: 'Richard \'Richie\' Jerimovich', profilePath: getPosterUrl('/eM33.jpg', 'w342') }
     ]
   }
 ];

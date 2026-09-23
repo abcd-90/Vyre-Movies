@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getMovieDetails, getRecommendations } from '../lib/providers/tmdb';
-import { getPlaybackUrl, PLAYER_SERVERS } from '../lib/providers/player';
+import { getPlaybackUrl, PLAYER_SERVERS, AUDIO_LANGUAGES } from '../lib/providers/player';
 import type { NormalizedMedia } from '../types/media';
-import { Star, Bookmark, Share2, AlertTriangle, RefreshCw, ArrowLeft, Server, ShieldCheck } from 'lucide-react';
+import { Star, Bookmark, Share2, AlertTriangle, RefreshCw, ArrowLeft, Server, ShieldCheck, Volume2 } from 'lucide-react';
 import { MediaRail } from '../components/rails/MediaRail';
 import { isInWatchlist, toggleWatchlist, saveWatchProgress } from '../lib/storage';
 import { useAdBlocker } from '../lib/useAdBlocker';
@@ -14,16 +14,21 @@ export const MovieWatchPage: React.FC = () => {
   const [movie, setMovie] = useState<NormalizedMedia | null>(null);
   const [recommendations, setRecommendations] = useState<NormalizedMedia[]>([]);
   const [activeServer, setActiveServer] = useState<'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer'>('vidsrc');
+  const [activeLanguage, setActiveLanguage] = useState<'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml'>('auto');
   const [playerUrl, setPlayerUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [playerError, setPlayerError] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const updatePlayerUrl = useCallback((mediaObj: NormalizedMedia, serverId: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer') => {
-    const url = getPlaybackUrl(mediaObj, { server: serverId });
+  const updatePlayerUrl = useCallback((
+    mediaObj: NormalizedMedia,
+    serverId: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer',
+    langId: 'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml' = activeLanguage
+  ) => {
+    const url = getPlaybackUrl(mediaObj, { server: serverId, language: langId });
     setPlayerUrl(url);
-  }, []);
+  }, [activeLanguage]);
 
   useEffect(() => {
     async function loadMovieAndPlayer() {
@@ -35,7 +40,7 @@ export const MovieWatchPage: React.FC = () => {
         setMovie(details);
         if (details) {
           setInWatchlist(isInWatchlist(details.id, 'movie'));
-          updatePlayerUrl(details, activeServer);
+          updatePlayerUrl(details, activeServer, activeLanguage);
 
           saveWatchProgress({
             mediaId: details.id,
@@ -65,7 +70,14 @@ export const MovieWatchPage: React.FC = () => {
   const handleServerChange = (serverId: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer') => {
     setActiveServer(serverId);
     if (movie) {
-      updatePlayerUrl(movie, serverId);
+      updatePlayerUrl(movie, serverId, activeLanguage);
+    }
+  };
+
+  const handleLanguageChange = (langId: 'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml') => {
+    setActiveLanguage(langId);
+    if (movie) {
+      updatePlayerUrl(movie, activeServer, langId);
     }
   };
 
@@ -116,8 +128,8 @@ export const MovieWatchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* SERVER SELECTION BAR */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* SERVER & AUDIO DUBBING SELECTION BAR */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3 bg-[#111419] border border-[#292F37] p-3 rounded-2xl">
           <div className="flex items-center gap-2 text-xs font-bold text-[#F4F5F7]">
             <Server className="w-4 h-4 text-[#D6FF3F]" />
@@ -135,6 +147,30 @@ export const MovieWatchPage: React.FC = () => {
                 }`}
               >
                 {srv.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* DUBBING & AUDIO TRACK BAR */}
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-[#111419] border border-[#292F37] p-3 rounded-2xl">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#F4F5F7]">
+            <Volume2 className="w-4 h-4 text-[#D6FF3F]" />
+            <span>AUDIO DUBBING:</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {AUDIO_LANGUAGES.map((lang) => (
+              <button
+                key={lang.id}
+                onClick={() => handleLanguageChange(lang.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  activeLanguage === lang.id
+                    ? 'bg-[#D6FF3F] text-[#0B0D10] shadow-sm ring-1 ring-[#D6FF3F]'
+                    : 'bg-[#171B21] text-[#9BA3AE] hover:text-[#F4F5F7] border border-[#292F37]'
+                }`}
+              >
+                <span>{lang.flag}</span>
+                <span>{lang.name}</span>
               </button>
             ))}
           </div>

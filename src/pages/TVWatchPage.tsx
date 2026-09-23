@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getTVDetails, getTVSeasonDetails, getRecommendations } from '../lib/providers/tmdb';
-import { getPlaybackUrl, PLAYER_SERVERS } from '../lib/providers/player';
+import { getPlaybackUrl, PLAYER_SERVERS, AUDIO_LANGUAGES } from '../lib/providers/player';
 import type { NormalizedMedia, SeasonDetails, EpisodeDetails } from '../types/media';
 import { CustomSeasonSelect } from '../components/watch/CustomSeasonSelect';
-import { Play, AlertTriangle, RefreshCw, ArrowLeft, Bookmark, Server, ShieldCheck } from 'lucide-react';
+import { Play, AlertTriangle, RefreshCw, ArrowLeft, Bookmark, Server, ShieldCheck, Volume2 } from 'lucide-react';
 import { MediaRail } from '../components/rails/MediaRail';
 import { isInWatchlist, toggleWatchlist, saveWatchProgress } from '../lib/storage';
 import { useAdBlocker } from '../lib/useAdBlocker';
@@ -22,19 +22,27 @@ export const TVWatchPage: React.FC = () => {
   const [currentEpisodeObj, setCurrentEpisodeObj] = useState<EpisodeDetails | null>(null);
   const [recommendations, setRecommendations] = useState<NormalizedMedia[]>([]);
   const [activeServer, setActiveServer] = useState<'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer'>('vidsrc');
+  const [activeLanguage, setActiveLanguage] = useState<'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml'>('auto');
   const [playerUrl, setPlayerUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [playerError, setPlayerError] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
 
-  const updatePlayerUrl = useCallback((mediaObj: NormalizedMedia, srvId: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer', sNum: number, epNum: number) => {
+  const updatePlayerUrl = useCallback((
+    mediaObj: NormalizedMedia,
+    srvId: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer',
+    sNum: number,
+    epNum: number,
+    langId: 'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml' = activeLanguage
+  ) => {
     const url = getPlaybackUrl(mediaObj, {
       season: sNum,
       episode: epNum,
       server: srvId,
+      language: langId,
     });
     setPlayerUrl(url);
-  }, []);
+  }, [activeLanguage]);
 
   useEffect(() => {
     async function loadTVWatch() {
@@ -46,7 +54,7 @@ export const TVWatchPage: React.FC = () => {
         setShow(details);
         if (details) {
           setInWatchlist(isInWatchlist(details.id, 'tv'));
-          updatePlayerUrl(details, activeServer, currentSeasonNum, currentEpisodeNum);
+          updatePlayerUrl(details, activeServer, currentSeasonNum, currentEpisodeNum, activeLanguage);
 
           const seasonData = await getTVSeasonDetails(details.id, currentSeasonNum);
           setSeasonDetails(seasonData);
@@ -92,7 +100,14 @@ export const TVWatchPage: React.FC = () => {
   const handleServerChange = (srvId: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer') => {
     setActiveServer(srvId);
     if (show) {
-      updatePlayerUrl(show, srvId, currentSeasonNum, currentEpisodeNum);
+      updatePlayerUrl(show, srvId, currentSeasonNum, currentEpisodeNum, activeLanguage);
+    }
+  };
+
+  const handleLanguageChange = (langId: 'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml') => {
+    setActiveLanguage(langId);
+    if (show) {
+      updatePlayerUrl(show, activeServer, currentSeasonNum, currentEpisodeNum, langId);
     }
   };
 
@@ -145,8 +160,8 @@ export const TVWatchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* STREAM SERVER SELECTION BAR */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* STREAM SERVER & DUBBING SELECTION BAR */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3 bg-[#111419] border border-[#292F37] p-3 rounded-2xl">
           <div className="flex items-center gap-2 text-xs font-bold text-[#F4F5F7]">
             <Server className="w-4 h-4 text-[#D6FF3F]" />
@@ -164,6 +179,30 @@ export const TVWatchPage: React.FC = () => {
                 }`}
               >
                 {srv.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* DUBBING & AUDIO TRACK BAR */}
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-[#111419] border border-[#292F37] p-3 rounded-2xl">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#F4F5F7]">
+            <Volume2 className="w-4 h-4 text-[#D6FF3F]" />
+            <span>AUDIO DUBBING:</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {AUDIO_LANGUAGES.map((lang) => (
+              <button
+                key={lang.id}
+                onClick={() => handleLanguageChange(lang.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  activeLanguage === lang.id
+                    ? 'bg-[#D6FF3F] text-[#0B0D10] shadow-sm ring-1 ring-[#D6FF3F]'
+                    : 'bg-[#171B21] text-[#9BA3AE] hover:text-[#F4F5F7] border border-[#292F37]'
+                }`}
+              >
+                <span>{lang.flag}</span>
+                <span>{lang.name}</span>
               </button>
             ))}
           </div>

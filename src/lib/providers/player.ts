@@ -7,6 +7,7 @@ export interface PlaybackOptions {
   episode?: number;
   useImdb?: boolean;
   server?: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer';
+  language?: 'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml';
 }
 
 export interface PlayerServer {
@@ -21,55 +22,71 @@ export const PLAYER_SERVERS: PlayerServer[] = [
   { id: 'apiplayer', name: 'Server 4 (APIPLAYER)' },
 ];
 
+export interface AudioLanguage {
+  id: 'auto' | 'hi' | 'en' | 'ta' | 'te' | 'ml';
+  name: string;
+  flag: string;
+}
+
+export const AUDIO_LANGUAGES: AudioLanguage[] = [
+  { id: 'auto', name: 'Original / Auto', flag: '🌐' },
+  { id: 'hi', name: 'Hindi Dubbed (हिंदी)', flag: '🇮🇳' },
+  { id: 'en', name: 'English Dubbed', flag: '🇺🇸' },
+  { id: 'ta', name: 'Tamil (தமிழ்)', flag: '🇮🇳' },
+  { id: 'te', name: 'Telugu (తెలుగు)', flag: '🇮🇳' },
+  { id: 'ml', name: 'Malayalam (മലയാളം)', flag: '🇮🇳' },
+];
+
 export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions): string {
   const baseUrl = DEFAULT_BASE_URL.replace(/\/$/, '');
-  const { season = 1, episode = 1, useImdb = false, server = 'vidsrc' } = options || {};
+  const { season = 1, episode = 1, useImdb = false, server = 'vidsrc', language = 'auto' } = options || {};
   const id = media.tmdbId || media.id;
   const imdb = media.imdbId;
+  const langSuffix = language !== 'auto' ? `&ds_lang=${language}&audio=${language}` : '';
 
   // Server 1: VidSrc (100% Working Global HD Stream)
   if (server === 'vidsrc') {
     if (media.type === 'tv') {
-      return `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
+      return `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}${langSuffix}`;
     }
-    return `https://vidsrc.me/embed/movie?tmdb=${id}`;
+    return `https://vidsrc.me/embed/movie?tmdb=${id}${langSuffix}`;
   }
 
   // Server 2: 2Embed (100% Working Backup)
   if (server === 'embed2') {
     if (media.type === 'tv') {
-      return `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`;
+      return `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}${langSuffix}`;
     }
-    return `https://www.2embed.cc/embed/${id}`;
+    return `https://www.2embed.cc/embed/${id}${langSuffix}`;
   }
 
   // Server 3: VidSrc PRO
   if (server === 'vidsrcpro') {
     if (media.type === 'tv') {
-      return `https://vidsrc.pro/embed/tv/${id}/${season}/${episode}`;
+      return `https://vidsrc.pro/embed/tv/${id}/${season}/${episode}${langSuffix ? `?ds_lang=${language}` : ''}`;
     }
-    return `https://vidsrc.pro/embed/movie/${id}`;
+    return `https://vidsrc.pro/embed/movie/${id}${langSuffix ? `?ds_lang=${language}` : ''}`;
   }
 
   // Server 4: APIPLAYER
   if (server === 'apiplayer') {
     if (media.type === 'tv') {
       if (useImdb && imdb) {
-        return `${baseUrl}/embed/tv/${imdb}/${season}/${episode}`;
+        return `${baseUrl}/embed/tv/${imdb}/${season}/${episode}${langSuffix}`;
       }
-      return `${baseUrl}/embed/tv/${id}/${season}/${episode}`;
+      return `${baseUrl}/embed/tv/${id}/${season}/${episode}${langSuffix}`;
     }
     if (useImdb && imdb) {
-      return `${baseUrl}/embed/movie/${imdb}`;
+      return `${baseUrl}/embed/movie/${imdb}${langSuffix}`;
     }
-    return `${baseUrl}/embed/movie/${id}`;
+    return `${baseUrl}/embed/movie/${id}${langSuffix}`;
   }
 
   // Default fallback to VidSrc
   if (media.type === 'tv') {
-    return `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
+    return `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}${langSuffix}`;
   }
-  return `https://vidsrc.me/embed/movie?tmdb=${id}`;
+  return `https://vidsrc.me/embed/movie?tmdb=${id}${langSuffix}`;
 }
 
 export function isAllowedPlaybackUrl(url: string): boolean {

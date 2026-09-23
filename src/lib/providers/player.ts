@@ -6,38 +6,28 @@ export interface PlaybackOptions {
   season?: number;
   episode?: number;
   useImdb?: boolean;
-  server?: 'autoembed' | 'vidsrc' | 'apiplayer' | 'vidsrcpro' | 'embed2' | 'vidsrccc';
+  server?: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer';
 }
 
 export interface PlayerServer {
-  id: 'autoembed' | 'vidsrc' | 'apiplayer' | 'vidsrcpro' | 'embed2' | 'vidsrccc';
+  id: 'vidsrc' | 'embed2' | 'vidsrcpro' | 'apiplayer';
   name: string;
 }
 
 export const PLAYER_SERVERS: PlayerServer[] = [
-  { id: 'autoembed', name: 'Server 1 (AutoEmbed - Super Fast)' },
-  { id: 'vidsrc', name: 'Server 2 (VidSrc - HD Stream)' },
-  { id: 'apiplayer', name: 'Server 3 (APIPLAYER - Multi)' },
-  { id: 'vidsrcpro', name: 'Server 4 (VidSrc PRO)' },
-  { id: 'embed2', name: 'Server 5 (2Embed)' },
-  { id: 'vidsrccc', name: 'Server 6 (VidSrc CC)' },
+  { id: 'vidsrc', name: 'Server 1 (VidSrc - HD Fast)' },
+  { id: 'embed2', name: 'Server 2 (2Embed - Ultra)' },
+  { id: 'vidsrcpro', name: 'Server 3 (VidSrc PRO)' },
+  { id: 'apiplayer', name: 'Server 4 (APIPLAYER)' },
 ];
 
 export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions): string {
   const baseUrl = DEFAULT_BASE_URL.replace(/\/$/, '');
-  const { season = 1, episode = 1, useImdb = false, server = 'autoembed' } = options || {};
+  const { season = 1, episode = 1, useImdb = false, server = 'vidsrc' } = options || {};
   const id = media.tmdbId || media.id;
   const imdb = media.imdbId;
 
-  // Server 1: AutoEmbed (Primary Fast Global Player, excellent seeking)
-  if (server === 'autoembed') {
-    if (media.type === 'tv') {
-      return `https://player.autoembed.cc/embed/tv/${id}/${season}/${episode}`;
-    }
-    return `https://player.autoembed.cc/embed/movie/${id}`;
-  }
-
-  // Server 2: VidSrc me
+  // Server 1: VidSrc (100% Working Global HD Stream)
   if (server === 'vidsrc') {
     if (media.type === 'tv') {
       return `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
@@ -45,7 +35,23 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
     return `https://vidsrc.me/embed/movie?tmdb=${id}`;
   }
 
-  // Server 3: APIPLAYER
+  // Server 2: 2Embed (100% Working Backup)
+  if (server === 'embed2') {
+    if (media.type === 'tv') {
+      return `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`;
+    }
+    return `https://www.2embed.cc/embed/${id}`;
+  }
+
+  // Server 3: VidSrc PRO
+  if (server === 'vidsrcpro') {
+    if (media.type === 'tv') {
+      return `https://vidsrc.pro/embed/tv/${id}/${season}/${episode}`;
+    }
+    return `https://vidsrc.pro/embed/movie/${id}`;
+  }
+
+  // Server 4: APIPLAYER
   if (server === 'apiplayer') {
     if (media.type === 'tv') {
       if (useImdb && imdb) {
@@ -59,35 +65,11 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
     return `${baseUrl}/embed/movie/${id}`;
   }
 
-  // Server 4: VidSrc PRO
-  if (server === 'vidsrcpro') {
-    if (media.type === 'tv') {
-      return `https://vidsrc.pro/embed/tv/${id}/${season}/${episode}`;
-    }
-    return `https://vidsrc.pro/embed/movie/${id}`;
-  }
-
-  // Server 5: 2Embed
-  if (server === 'embed2') {
-    if (media.type === 'tv') {
-      return `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`;
-    }
-    return `https://www.2embed.cc/embed/${id}`;
-  }
-
-  // Server 6: VidSrc CC
-  if (server === 'vidsrccc') {
-    if (media.type === 'tv') {
-      return `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`;
-    }
-    return `https://vidsrc.cc/v2/embed/movie/${id}`;
-  }
-
-  // Default fallback
+  // Default fallback to VidSrc
   if (media.type === 'tv') {
-    return `https://player.autoembed.cc/embed/tv/${id}/${season}/${episode}`;
+    return `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
   }
-  return `https://player.autoembed.cc/embed/movie/${id}`;
+  return `https://vidsrc.me/embed/movie?tmdb=${id}`;
 }
 
 export function isAllowedPlaybackUrl(url: string): boolean {
@@ -103,8 +85,6 @@ export function isAllowedPlaybackUrl(url: string): boolean {
       '2embed.org',
       '2embed.cc',
       'www.2embed.cc',
-      'autoembed.cc',
-      'player.autoembed.cc',
     ];
     return allowedHosts.some((host) => parsed.hostname.toLowerCase().endsWith(host));
   } catch (e) {

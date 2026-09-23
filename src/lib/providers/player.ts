@@ -1,6 +1,6 @@
 import type { NormalizedMedia } from '../../types/media';
 
-export type ServerId = 'vidsrc' | 'autoembed' | 'embed2' | 'smashystream' | 'vidsrcpm' | 'videasy' | 'vidsrcio';
+export type ServerId = 'vidsrc' | 'autoembed' | 'multiembed' | 'embed2' | 'smashystream' | 'vidsrcpm' | 'videasy' | 'vidsrcio';
 
 export interface PlaybackOptions {
   season?: number;
@@ -17,12 +17,13 @@ export interface PlayerServer {
 
 export const PLAYER_SERVERS: PlayerServer[] = [
   { id: 'vidsrc', name: 'Server 1 (VidSrc HD - Fast Multi-Audio)' },
-  { id: 'autoembed', name: 'Server 2 (AutoEmbed - Hindi/Dual Audio)' },
-  { id: 'embed2', name: 'Server 3 (2Embed VIP - Multi Language)' },
-  { id: 'smashystream', name: 'Server 4 (SmashyStream - Hindi & Dubbed)' },
-  { id: 'vidsrcpm', name: 'Server 5 (VidSrc PM - Dubbed Stream)' },
-  { id: 'videasy', name: 'Server 6 (Videasy - Multi Language)' },
-  { id: 'vidsrcio', name: 'Server 7 (VidSrc IO - Multi Track)' },
+  { id: 'autoembed', name: 'Server 2 (AutoEmbed - Dual Audio)' },
+  { id: 'multiembed', name: 'Server 3 (MultiEmbed - Hindi/Dubbed VIP)' },
+  { id: 'embed2', name: 'Server 4 (2Embed VIP - Multi Language)' },
+  { id: 'smashystream', name: 'Server 5 (SmashyStream - Hindi & Dubbed)' },
+  { id: 'vidsrcpm', name: 'Server 6 (VidSrc PM - Dubbed Stream)' },
+  { id: 'videasy', name: 'Server 7 (Videasy - Multi Language)' },
+  { id: 'vidsrcio', name: 'Server 8 (VidSrc IO - Multi Track)' },
 ];
 
 export interface AudioLanguage {
@@ -68,7 +69,15 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
       rawUrl = `https://autoembed.co/movie/tmdb/${id}`;
     }
   }
-  // Server 3: 2Embed VIP (2embed.cc)
+  // Server 3: MultiEmbed (multiembed.mov - Dedicated Dual Audio & Hindi)
+  else if (server === 'multiembed') {
+    if (media.type === 'tv') {
+      rawUrl = `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
+    } else {
+      rawUrl = `https://multiembed.mov/?video_id=${id}&tmdb=1`;
+    }
+  }
+  // Server 4: 2Embed VIP (2embed.cc)
   else if (server === 'embed2') {
     if (media.type === 'tv') {
       rawUrl = `https://www.2embed.cc/embedtv/${id}?s=${season}&e=${episode}`;
@@ -76,7 +85,7 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
       rawUrl = `https://www.2embed.cc/embed/${id}`;
     }
   }
-  // Server 4: SmashyStream (Dedicated Hindi & Dubbed)
+  // Server 5: SmashyStream (Dedicated Hindi & Dubbed)
   else if (server === 'smashystream') {
     if (media.type === 'tv') {
       rawUrl = `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${season}&episode=${episode}`;
@@ -84,7 +93,7 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
       rawUrl = `https://embed.smashystream.com/playere.php?tmdb=${id}`;
     }
   }
-  // Server 5: VidSrc PM (vidsrc.pm)
+  // Server 6: VidSrc PM (vidsrc.pm)
   else if (server === 'vidsrcpm') {
     if (media.type === 'tv') {
       rawUrl = `https://vidsrc.pm/embed/tv/${id}/${season}/${episode}`;
@@ -95,7 +104,7 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
       rawUrl += `?ds_lang=${language}`;
     }
   }
-  // Server 6: Videasy (videasy.net)
+  // Server 7: Videasy (videasy.net)
   else if (server === 'videasy') {
     if (media.type === 'tv') {
       rawUrl = `https://player.videasy.net/tv/${id}/${season}/${episode}`;
@@ -103,7 +112,7 @@ export function getPlaybackUrl(media: NormalizedMedia, options?: PlaybackOptions
       rawUrl = `https://player.videasy.net/movie/${id}`;
     }
   }
-  // Server 7: VidSrc IO (vidsrc.io)
+  // Server 8: VidSrc IO (vidsrc.io)
   else if (server === 'vidsrcio') {
     if (media.type === 'tv') {
       rawUrl = `https://vidsrc.io/embed/tv/${id}/${season}/${episode}`;
@@ -138,6 +147,8 @@ export function isAllowedPlaybackUrl(url: string): boolean {
       'embed.smashystream.com',
       'videasy.net',
       'player.videasy.net',
+      'multiembed.mov',
+      'streamingnow.mov',
     ];
     return allowedHosts.some((host) => parsed.hostname.toLowerCase().endsWith(host));
   } catch (e) {

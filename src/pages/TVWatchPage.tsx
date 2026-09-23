@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getTVDetails, getTVSeasonDetails, getRecommendations } from '../lib/providers/tmdb';
 import { getPlaybackUrl, PLAYER_SERVERS, AUDIO_LANGUAGES, type ServerId } from '../lib/providers/player';
@@ -29,12 +29,12 @@ export const TVWatchPage: React.FC = () => {
   const [inWatchlist, setInWatchlist] = useState(false);
   const [shieldActive, setShieldActive] = useState(true);
 
-  const updatePlayerUrl = useCallback((
+  const updatePlayerUrl = (
     mediaObj: NormalizedMedia,
     srvId: ServerId,
     sNum: number,
     epNum: number,
-    langId: 'auto' | 'hi' | 'en' | 'es' | 'fr' | 'ta' | 'te' | 'ml' | 'de' = activeLanguage
+    langId: 'auto' | 'hi' | 'en' | 'es' | 'fr' | 'ta' | 'te' | 'ml' | 'de'
   ) => {
     const url = getPlaybackUrl(mediaObj, {
       season: sNum,
@@ -44,7 +44,7 @@ export const TVWatchPage: React.FC = () => {
     });
     setPlayerUrl(url);
     setShieldActive(true);
-  }, [activeLanguage]);
+  };
 
   useEffect(() => {
     async function loadTVWatch() {
@@ -220,10 +220,10 @@ export const TVWatchPage: React.FC = () => {
             <span className="text-xl">🇵🇰 / 🇮🇳 🔊</span>
             <div className="space-y-1">
               <p className="font-extrabold text-[#D6FF3F] uppercase tracking-wider text-[11px]">
-                {AUDIO_LANGUAGES.find((l) => l.id === activeLanguage)?.name} Stream Active
+                {AUDIO_LANGUAGES.find((l) => l.id === activeLanguage)?.name} Active
               </p>
               <p className="text-[11px] text-[#9BA3AE] leading-relaxed">
-                Stream parameters passed to player. If video plays in original audio, click the <span className="font-bold text-white">⚙️ Settings Icon</span> or <span className="font-bold text-white">💬 Audio</span> icon inside the video player controls (bottom right) to pick <span className="font-bold text-[#D6FF3F]">Hindi / Dubbed Track</span>, or try <span className="font-bold text-[#D6FF3F]">Server 3 (2Embed)</span> & <span className="font-bold text-[#D6FF3F]">Server 4 (VidSrc PM)</span>!
+                Stream updated to <span className="font-bold text-[#D6FF3F]">{AUDIO_LANGUAGES.find((l) => l.id === activeLanguage)?.name}</span>. For titles with official dubbed releases, switch between <span className="font-bold text-white">Server 1, Server 2 (AutoEmbed)</span> & <span className="font-bold text-white">Server 3 (MultiEmbed)</span>, or select <span className="font-bold text-white">Hindi/Audio Track</span> inside the player controls!
               </p>
             </div>
           </div>
@@ -261,7 +261,7 @@ export const TVWatchPage: React.FC = () => {
                 </div>
               )}
               <iframe
-                key={playerUrl}
+                key={`${playerUrl}-${activeLanguage}-${activeServer}`}
                 src={playerUrl}
                 title={`${show.title} S${currentSeasonNum} E${currentEpisodeNum}`}
                 className="w-full h-full border-0"

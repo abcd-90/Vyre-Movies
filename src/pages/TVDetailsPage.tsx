@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Play, Bookmark, Star, Calendar, Tv, Layers } from 'lucide-react';
+import { Play, Bookmark, Star, Calendar, Tv, Layers, Volume2, MessageSquare } from 'lucide-react';
 import { getTVDetails, getTVSeasonDetails, getRecommendations } from '../lib/providers/tmdb';
 import type { NormalizedMedia, SeasonDetails } from '../types/media';
+import type { AudioTrack, SubtitleTrack } from '../types/audio';
+import { getAvailableAudioTracks, getAvailableSubtitles } from '../lib/audioManager';
 import { CastCard } from '../components/cards/CastCard';
 import { MediaRail } from '../components/rails/MediaRail';
 import { DetailSkeleton } from '../components/common/Skeletons';
@@ -15,6 +17,8 @@ export const TVDetailsPage: React.FC = () => {
   const [seasonDetails, setSeasonDetails] = useState<SeasonDetails | null>(null);
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [recommendations, setRecommendations] = useState<NormalizedMedia[]>([]);
+  const [availableAudio, setAvailableAudio] = useState<AudioTrack[]>([]);
+  const [availableSubs, setAvailableSubs] = useState<SubtitleTrack[]>([]);
   const [loading, setLoading] = useState(true);
   const [inWatchlist, setInWatchlist] = useState(false);
 
@@ -27,6 +31,12 @@ export const TVDetailsPage: React.FC = () => {
         setShow(details);
         if (details) {
           setInWatchlist(isInWatchlist(details.id, 'tv'));
+
+          const audioTracks = getAvailableAudioTracks(details, 1, 1);
+          const subTracks = getAvailableSubtitles(details, 1, 1);
+          setAvailableAudio(audioTracks);
+          setAvailableSubs(subTracks);
+
           const seasonData = await getTVSeasonDetails(details.id, 1);
           setSeasonDetails(seasonData);
           const recs = await getRecommendations(details.id, 'tv');
@@ -48,6 +58,10 @@ export const TVDetailsPage: React.FC = () => {
     setSelectedSeason(seasonNum);
     const seasonData = await getTVSeasonDetails(show.id, seasonNum);
     setSeasonDetails(seasonData);
+
+    // Refresh audio tracks for season
+    const audioTracks = getAvailableAudioTracks(show, seasonNum, 1);
+    setAvailableAudio(audioTracks);
   };
 
   const handleWatchlistToggle = () => {
@@ -59,7 +73,7 @@ export const TVDetailsPage: React.FC = () => {
   if (loading) return <DetailSkeleton />;
   if (!show) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-32 text-center">
+      <div className="max-w-7xl mx-auto px-4 py-32 text-center select-none">
         <h2 className="text-2xl font-bold text-[#F4F5F7]">TV Series Not Found</h2>
         <Link to="/" className="text-xs font-bold text-[#D6FF3F] hover:underline mt-4 inline-block">
           Return to Home
@@ -69,7 +83,7 @@ export const TVDetailsPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-12 pb-16">
+    <div className="space-y-12 pb-16 select-none">
       <div className="relative w-full min-h-[580px] bg-[#0B0D10] pt-28 pb-12 flex items-end">
         <div className="absolute inset-0">
           <img
@@ -111,7 +125,47 @@ export const TVDetailsPage: React.FC = () => {
               </span>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            {/* AUDIO & SUBTITLE METADATA DISPLAY */}
+            <div className="space-y-3 pt-2">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-xs font-extrabold text-[#D6FF3F] uppercase tracking-wider flex items-center gap-1.5">
+                  <Volume2 className="w-4 h-4" /> Series Audio:
+                </span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {availableAudio.map((track) => (
+                    <span
+                      key={track.id}
+                      className="px-2.5 py-1 bg-[#171B21] border border-[#292F37] rounded-lg text-xs font-bold text-[#F4F5F7] flex items-center gap-1.5"
+                    >
+                      <span>🎧</span>
+                      <span>{track.flag}</span>
+                      <span>{track.label}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {availableSubs.length > 0 && (
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="text-xs font-extrabold text-[#9BA3AE] uppercase tracking-wider flex items-center gap-1.5">
+                    <MessageSquare className="w-4 h-4 text-[#D6FF3F]" /> Subtitles:
+                  </span>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {availableSubs.filter((s) => s.id !== 'off').map((sub) => (
+                      <span
+                        key={sub.id}
+                        className="px-2.5 py-0.5 bg-[#171B21] border border-[#292F37] rounded-md text-[11px] font-semibold text-[#9BA3AE] flex items-center gap-1"
+                      >
+                        <span className="text-[#D6FF3F]">CC</span>
+                        <span>{sub.label}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-2 pt-1">
               {show.genres.map((g, i) => (
                 <span key={i} className="px-3 py-1 bg-[#171B21] border border-[#292F37] rounded-lg text-xs font-medium text-[#F4F5F7]">
                   {g}

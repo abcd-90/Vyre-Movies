@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { Search, Bookmark, Settings, Menu, X } from 'lucide-react';
+import { Search, Bookmark, Settings, Menu, X, Shield } from 'lucide-react';
 import { VyreLogo } from '../common/VyreLogo';
 import { SearchModal } from '../search/SearchModal';
 import { getWatchlist } from '../../lib/storage';
@@ -113,6 +113,14 @@ export const Navbar: React.FC = () => {
             </Link>
 
             <Link
+              to="/admin"
+              className="p-2.5 bg-[#171B21] border border-[#292F37] hover:border-[#D6FF3F]/50 text-[#9BA3AE] hover:text-[#D6FF3F] rounded-xl transition-all group"
+              title="Audio & Stream Admin"
+            >
+              <Shield className="w-4 h-4 group-hover:text-[#D6FF3F] transition-colors" />
+            </Link>
+
+            <Link
               to="/settings"
               className="p-2.5 bg-[#171B21] border border-[#292F37] hover:border-[#D6FF3F]/50 text-[#9BA3AE] hover:text-[#F4F5F7] rounded-xl transition-all group"
               title="Settings"
@@ -147,6 +155,19 @@ export const Navbar: React.FC = () => {
                 {item.label}
               </NavLink>
             ))}
+            <NavLink
+              to="/admin"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={({ isActive }) =>
+                `block px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  isActive
+                    ? 'bg-[#D6FF3F] text-[#0B0D10] font-bold'
+                    : 'text-[#9BA3AE] hover:text-[#F4F5F7] hover:bg-[#171B21]'
+                }`
+              }
+            >
+              Audio & Dubbing Admin
+            </NavLink>
           </div>
         )}
       </header>

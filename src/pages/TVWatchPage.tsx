@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getTVDetails, getTVSeasonDetails, getRecommendations } from '../lib/providers/tmdb';
-import { getPlaybackUrl, PLAYER_SERVERS, AUDIO_LANGUAGES, type ServerId } from '../lib/providers/player';
+import { getPlaybackUrl, type ServerId } from '../lib/providers/player';
 import type { NormalizedMedia, SeasonDetails, EpisodeDetails } from '../types/media';
+import type { AudioTrack, SubtitleTrack } from '../types/audio';
+import { getAvailableAudioTracks, getAvailableSubtitles, resolveBestAudioTrack } from '../lib/audioManager';
+import { VyreVideoPlayer } from '../components/watch/VyreVideoPlayer';
 import { CustomSeasonSelect } from '../components/watch/CustomSeasonSelect';
-import { Play, AlertTriangle, RefreshCw, ArrowLeft, Bookmark, Server, ShieldCheck, Volume2 } from 'lucide-react';
+import { Play, ArrowLeft, Bookmark, ShieldCheck, Volume2 } from 'lucide-react';
 import { MediaRail } from '../components/rails/MediaRail';
 import { isInWatchlist, toggleWatchlist, saveWatchProgress } from '../lib/storage';
 import { useAdBlocker } from '../lib/useAdBlocker';
@@ -22,41 +25,75 @@ export const TVWatchPage: React.FC = () => {
   const [currentEpisodeObj, setCurrentEpisodeObj] = useState<EpisodeDetails | null>(null);
   const [recommendations, setRecommendations] = useState<NormalizedMedia[]>([]);
   const [activeServer, setActiveServer] = useState<ServerId>('vidsrc');
-  const [activeLanguage, setActiveLanguage] = useState<'auto' | 'hi' | 'en' | 'es' | 'fr' | 'ta' | 'te' | 'ml' | 'de'>('auto');
+
+  // Audio & Subtitle State
+  const [availableAudioTracks, setAvailableAudioTracks] = useState<AudioTrack[]>([]);
+  const [activeAudioTrack, setActiveAudioTrack] = useState<AudioTrack>({
+    id: 'en',
+    language: 'en',
+    label: 'English (Original)',
+    flag: '🇺🇸',
+    type: 'original',
+    available: true,
+  });
+
+  const [availableSubtitles, setAvailableSubtitles] = useState<SubtitleTrack[]>([]);
+  const [activeSubtitle, setActiveSubtitle] = useState<SubtitleTrack>({
+    id: 'en_sub',
+    language: 'en',
+    label: 'English (CC)',
+    flag: '🇺🇸',
+    available: true,
+  });
+
   const [playerUrl, setPlayerUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const [playerError, setPlayerError] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
-  const [shieldActive, setShieldActive] = useState(true);
 
-  const updatePlayerUrl = (
+  const updatePlayerStream = (
     mediaObj: NormalizedMedia,
     srvId: ServerId,
     sNum: number,
     epNum: number,
-    langId: 'auto' | 'hi' | 'en' | 'es' | 'fr' | 'ta' | 'te' | 'ml' | 'de'
+    track: AudioTrack
   ) => {
     const url = getPlaybackUrl(mediaObj, {
       season: sNum,
       episode: epNum,
       server: srvId,
-      language: langId,
+      language: track.language,
+      audioTrack: track,
     });
     setPlayerUrl(url);
-    setShieldActive(true);
   };
 
   useEffect(() => {
     async function loadTVWatch() {
       if (!id) return;
       setLoading(true);
-      setPlayerError(false);
       try {
         const details = await getTVDetails(id);
         setShow(details);
         if (details) {
           setInWatchlist(isInWatchlist(details.id, 'tv'));
-          updatePlayerUrl(details, activeServer, currentSeasonNum, currentEpisodeNum, activeLanguage);
+
+          // Available tracks for this specific TV show episode
+          const tracks = getAvailableAudioTracks(details, currentSeasonNum, currentEpisodeNum);
+          const subs = getAvailableSubtitles(details, currentSeasonNum, currentEpisodeNum);
+          setAvailableAudioTracks(tracks);
+          setAvailableSubtitles(subs);
+
+          // Preserve selected language across episode navigation or fall back gracefully
+          const resolvedAudio = resolveBestAudioTrack(
+            tracks,
+            activeAudioTrack.id !== 'en' ? activeAudioTrack.id : null,
+            (details as any).originalLanguage
+          );
+          setActiveAudioTrack(resolvedAudio);
+
+          if (subs.length > 0) setActiveSubtitle(subs[0]);
+
+          updatePlayerStream(details, activeServer, currentSeasonNum, currentEpisodeNum, resolvedAudio);
 
           const seasonData = await getTVSeasonDetails(details.id, currentSeasonNum);
           setSeasonDetails(seasonData);
@@ -90,7 +127,6 @@ export const TVWatchPage: React.FC = () => {
         }
       } catch (err) {
         console.error('Error setting up TV watch page:', err);
-        setPlayerError(true);
       } finally {
         setLoading(false);
       }
@@ -102,19 +138,19 @@ export const TVWatchPage: React.FC = () => {
   const handleServerChange = (srvId: ServerId) => {
     setActiveServer(srvId);
     if (show) {
-      updatePlayerUrl(show, srvId, currentSeasonNum, currentEpisodeNum, activeLanguage);
+      updatePlayerStream(show, srvId, currentSeasonNum, currentEpisodeNum, activeAudioTrack);
     }
   };
 
-  const handleLanguageChange = (langId: 'auto' | 'hi' | 'en' | 'es' | 'fr' | 'ta' | 'te' | 'ml' | 'de') => {
-    setActiveLanguage(langId);
+  const handleAudioTrackChange = (track: AudioTrack) => {
+    setActiveAudioTrack(track);
     if (show) {
-      updatePlayerUrl(show, activeServer, currentSeasonNum, currentEpisodeNum, langId);
+      updatePlayerStream(show, activeServer, currentSeasonNum, currentEpisodeNum, track);
     }
   };
 
-  const handleShieldClick = () => {
-    setShieldActive(false);
+  const handleSubtitleChange = (sub: SubtitleTrack) => {
+    setActiveSubtitle(sub);
   };
 
   const handleSelectSeason = (newSeasonNum: number) => {
@@ -136,7 +172,7 @@ export const TVWatchPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="pt-24 max-w-7xl mx-auto px-4 space-y-4">
+      <div className="pt-24 max-w-7xl mx-auto px-4 space-y-4 select-none">
         <div className="w-full aspect-video bg-[#171B21] rounded-2xl skeleton-shimmer" />
         <div className="w-1/3 h-8 rounded bg-[#171B21] skeleton-shimmer" />
       </div>
@@ -153,7 +189,7 @@ export const TVWatchPage: React.FC = () => {
   }
 
   return (
-    <div className="pt-20 sm:pt-24 pb-16 space-y-6">
+    <div className="pt-20 sm:pt-24 pb-16 space-y-6 select-none">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         <Link
           to={`/tv/${show.id}`}
@@ -166,112 +202,20 @@ export const TVWatchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* STREAM SERVER & DUBBING SELECTION BAR */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-[#111419] border border-[#292F37] p-3 rounded-2xl">
-          <div className="flex items-center gap-2 text-xs font-bold text-[#F4F5F7]">
-            <Server className="w-4 h-4 text-[#D6FF3F]" />
-            <span>STREAM SERVER:</span>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {PLAYER_SERVERS.map((srv) => (
-              <button
-                key={srv.id}
-                onClick={() => handleServerChange(srv.id)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  activeServer === srv.id
-                    ? 'bg-[#D6FF3F] text-[#0B0D10] shadow-sm'
-                    : 'bg-[#171B21] text-[#9BA3AE] hover:text-[#F4F5F7] border border-[#292F37]'
-                }`}
-              >
-                {srv.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* DUBBING & AUDIO TRACK BAR */}
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-[#111419] border border-[#292F37] p-3 rounded-2xl">
-          <div className="flex items-center gap-2 text-xs font-bold text-[#F4F5F7]">
-            <Volume2 className="w-4 h-4 text-[#D6FF3F]" />
-            <span>AUDIO DUBBING:</span>
-          </div>
-          <div className="flex flex-wrap items-center gap-1.5">
-            {AUDIO_LANGUAGES.map((lang) => (
-              <button
-                key={lang.id}
-                onClick={() => handleLanguageChange(lang.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                  activeLanguage === lang.id
-                    ? 'bg-[#D6FF3F] text-[#0B0D10] shadow-sm ring-1 ring-[#D6FF3F]'
-                    : 'bg-[#171B21] text-[#9BA3AE] hover:text-[#F4F5F7] border border-[#292F37]'
-                }`}
-              >
-                <span>{lang.flag}</span>
-                <span>{lang.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* DUBBING AUDIO GUIDANCE NOTICE */}
-        {activeLanguage !== 'auto' && (
-          <div className="p-3.5 bg-[#111419] border border-[#D6FF3F]/60 rounded-xl flex items-start gap-3 text-xs text-[#F4F5F7] shadow-xl animate-fadeIn">
-            <span className="text-xl">🇵🇰 / 🇮🇳 🔊</span>
-            <div className="space-y-1">
-              <p className="font-extrabold text-[#D6FF3F] uppercase tracking-wider text-[11px]">
-                {AUDIO_LANGUAGES.find((l) => l.id === activeLanguage)?.name} Active
-              </p>
-              <p className="text-[11px] text-[#9BA3AE] leading-relaxed">
-                Stream updated to <span className="font-bold text-[#D6FF3F]">{AUDIO_LANGUAGES.find((l) => l.id === activeLanguage)?.name}</span>. For titles with official dubbed releases, switch between <span className="font-bold text-white">Server 1, Server 2 (AutoEmbed)</span> & <span className="font-bold text-white">Server 3 (MultiEmbed)</span>, or select <span className="font-bold text-white">Hindi/Audio Track</span> inside the player controls!
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-
+      {/* DYNAMIC PLAYER CONTAINER WITH INTEGRATED AUDIO CONTROLS */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative w-full aspect-video bg-black rounded-2xl border border-[#292F37] overflow-hidden shadow-2xl">
-          {playerError ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#111419] p-6 text-center space-y-3">
-              <AlertTriangle className="w-10 h-10 text-[#D6FF3F]" />
-              <h3 className="text-base font-bold text-[#F4F5F7]">Playback Couldn't Be Loaded</h3>
-              <p className="text-xs text-[#9BA3AE] max-w-sm">
-                Try switching to Server 2, 3 or 4 above.
-              </p>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-[#D6FF3F] text-[#0B0D10] font-bold text-xs rounded-xl flex items-center gap-2 hover:scale-105 transition-all"
-              >
-                <RefreshCw className="w-3.5 h-3.5" /> Retry Playback
-              </button>
-            </div>
-          ) : (
-            <>
-              {shieldActive && (
-                <div
-                  onClick={handleShieldClick}
-                  className="absolute inset-0 z-20 bg-black/5 hover:bg-black/10 cursor-pointer flex items-center justify-center transition-colors group/shield"
-                  title="Click once to activate player"
-                >
-                  <div className="px-4 py-2 bg-[#0B0D10]/90 border border-[#D6FF3F]/40 backdrop-blur-md rounded-full text-[11px] font-extrabold text-[#D6FF3F] shadow-2xl flex items-center gap-2 group-hover/shield:scale-105 transition-transform">
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>CLICK ONCE TO START PLAYER (AD-SHIELD ACTIVE)</span>
-                  </div>
-                </div>
-              )}
-              <iframe
-                key={`${playerUrl}-${activeLanguage}-${activeServer}`}
-                src={playerUrl}
-                title={`${show.title} S${currentSeasonNum} E${currentEpisodeNum}`}
-                className="w-full h-full border-0"
-                allowFullScreen
-                allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; clipboard-write; gyroscope"
-                referrerPolicy="no-referrer"
-              />
-            </>
-          )}
-        </div>
+        <VyreVideoPlayer
+          title={`${show.title} S${currentSeasonNum} E${currentEpisodeNum}`}
+          playerUrl={playerUrl}
+          availableAudioTracks={availableAudioTracks}
+          activeAudioTrack={activeAudioTrack}
+          availableSubtitles={availableSubtitles}
+          activeSubtitle={activeSubtitle}
+          activeServer={activeServer}
+          onSelectAudioTrack={handleAudioTrackChange}
+          onSelectSubtitle={handleSubtitleChange}
+          onSelectServer={handleServerChange}
+        />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
@@ -297,6 +241,30 @@ export const TVWatchPage: React.FC = () => {
               <Bookmark className="w-4 h-4 fill-current" />
               {inWatchlist ? 'IN WATCHLIST' : 'WATCHLIST'}
             </button>
+          </div>
+        </div>
+
+        {/* EPISODE AUDIO SUMMARY */}
+        <div className="p-4 bg-[#111419] border border-[#292F37] rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h4 className="text-xs font-extrabold text-[#D6FF3F] uppercase tracking-wider flex items-center gap-2">
+              <Volume2 className="w-4 h-4" /> Available Episode Audio Tracks
+            </h4>
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              {availableAudioTracks.map((t) => (
+                <span
+                  key={t.id}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 ${
+                    t.id === activeAudioTrack.id
+                      ? 'bg-[#D6FF3F]/20 text-[#D6FF3F] border border-[#D6FF3F]/40'
+                      : 'bg-[#171B21] text-[#9BA3AE] border border-[#292F37]'
+                  }`}
+                >
+                  <span>{t.flag}</span>
+                  <span>{t.label}</span>
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 

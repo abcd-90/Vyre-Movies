@@ -1,9 +1,18 @@
 import React, { useState } from 'react';
-import { Settings, Trash2, Check, Shield, Monitor } from 'lucide-react';
+import { Settings, Trash2, Check, Shield, Monitor, Volume2 } from 'lucide-react';
 import { getSettings, saveSettings, clearWatchHistory, clearWatchlist } from '../lib/storage';
+import {
+  getSavedAudioLanguagePreference,
+  setSavedAudioLanguagePreference,
+  isRememberAudioLanguageEnabled,
+  setRememberAudioLanguageEnabled,
+} from '../lib/audioManager';
+import { ALL_SUPPORTED_LANGUAGES } from '../types/audio';
 
 export const SettingsPage: React.FC = () => {
   const [settings, setSettings] = useState(getSettings());
+  const [preferredAudioLang, setPreferredAudioLang] = useState(getSavedAudioLanguagePreference());
+  const [rememberAudioLang, setRememberAudioLang] = useState(isRememberAudioLanguageEnabled());
   const [savedMsg, setSavedMsg] = useState(false);
   const [clearedHistoryMsg, setClearedHistoryMsg] = useState(false);
   const [clearedListMsg, setClearedListMsg] = useState(false);
@@ -26,6 +35,19 @@ export const SettingsPage: React.FC = () => {
     showNotice();
   };
 
+  const handleAudioLangChange = (code: string) => {
+    setPreferredAudioLang(code);
+    setSavedAudioLanguagePreference(code);
+    showNotice();
+  };
+
+  const handleToggleRememberAudio = () => {
+    const nextVal = !rememberAudioLang;
+    setRememberAudioLang(nextVal);
+    setRememberAudioLanguageEnabled(nextVal);
+    showNotice();
+  };
+
   const showNotice = () => {
     setSavedMsg(true);
     setTimeout(() => setSavedMsg(false), 2000);
@@ -44,14 +66,14 @@ export const SettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 space-y-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 space-y-8 select-none">
       {/* Header */}
       <div className="border-b border-[#292F37] pb-6">
         <div className="flex items-center gap-2 text-xs font-bold text-[#D6FF3F] tracking-widest uppercase mb-1">
           <Settings className="w-4 h-4" /> PLATFORM PREFERENCES
         </div>
         <h1 className="text-3xl font-extrabold text-[#F4F5F7]">Settings & Preferences</h1>
-        <p className="text-xs text-[#9BA3AE] mt-1">Configure playback options, theme defaults, and local data storage.</p>
+        <p className="text-xs text-[#9BA3AE] mt-1">Configure audio dubbing defaults, playback options, and local data storage.</p>
       </div>
 
       {savedMsg && (
@@ -60,10 +82,56 @@ export const SettingsPage: React.FC = () => {
         </div>
       )}
 
+      {/* AUDIO DUBBING PREFERENCES */}
+      <div className="bg-[#111419] border border-[#292F37] rounded-2xl p-6 space-y-6">
+        <h3 className="text-sm font-extrabold text-[#F4F5F7] uppercase tracking-wider flex items-center gap-2">
+          <Volume2 className="w-4 h-4 text-[#D6FF3F]" /> Audio & Language Dubbing Settings
+        </h3>
+
+        {/* Remember My Audio Language */}
+        <div className="flex items-center justify-between py-2 border-b border-[#292F37]">
+          <div>
+            <h4 className="text-sm font-semibold text-[#F4F5F7]">Remember My Audio Language</h4>
+            <p className="text-xs text-[#9BA3AE]">Automatically select your preferred audio language for all future movies & TV shows.</p>
+          </div>
+          <button
+            onClick={handleToggleRememberAudio}
+            className={`w-12 h-6 rounded-full transition-colors relative ${
+              rememberAudioLang ? 'bg-[#D6FF3F]' : 'bg-[#292F37]'
+            }`}
+          >
+            <span
+              className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-[#0B0D10] transition-transform ${
+                rememberAudioLang ? 'translate-x-6' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Default Preferred Audio Language */}
+        <div className="flex items-center justify-between py-2">
+          <div>
+            <h4 className="text-sm font-semibold text-[#F4F5F7]">Preferred Audio Track / Dubbing</h4>
+            <p className="text-xs text-[#9BA3AE]">Default audio language to select when playing content.</p>
+          </div>
+          <select
+            value={preferredAudioLang}
+            onChange={(e) => handleAudioLangChange(e.target.value)}
+            className="bg-[#171B21] border border-[#292F37] text-[#F4F5F7] text-xs font-bold px-3 py-2 rounded-xl focus:outline-none focus:border-[#D6FF3F]"
+          >
+            {ALL_SUPPORTED_LANGUAGES.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.flag} {lang.name} ({lang.nativeName})
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {/* Playback Settings */}
       <div className="bg-[#111419] border border-[#292F37] rounded-2xl p-6 space-y-6">
         <h3 className="text-sm font-extrabold text-[#F4F5F7] uppercase tracking-wider flex items-center gap-2">
-          <Monitor className="w-4 h-4 text-[#D6FF3F]" /> Playback Preferences
+          <Monitor className="w-4 h-4 text-[#D6FF3F]" /> General Playback Preferences
         </h3>
 
         {/* Autoplay Next Episode */}
@@ -103,11 +171,11 @@ export const SettingsPage: React.FC = () => {
           </select>
         </div>
 
-        {/* Preferred Language */}
+        {/* Interface Language */}
         <div className="flex items-center justify-between py-2">
           <div>
-            <h4 className="text-sm font-semibold text-[#F4F5F7]">Interface Language</h4>
-            <p className="text-xs text-[#9BA3AE]">Metadata display language for TMDB content.</p>
+            <h4 className="text-sm font-semibold text-[#F4F5F7]">Interface Metadata Language</h4>
+            <p className="text-xs text-[#9BA3AE]">Metadata display language for TMDB content details.</p>
           </div>
           <select
             value={settings.language}

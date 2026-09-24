@@ -13,6 +13,7 @@ import { MovieWatchPage } from './pages/MovieWatchPage';
 import { TVWatchPage } from './pages/TVWatchPage';
 import { WatchlistPage } from './pages/WatchlistPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { AdminPage } from './pages/AdminPage';
 import { initSecurityProtection } from './lib/security';
 
 const ScrollToTop: React.FC = () => {
@@ -46,6 +47,7 @@ export function App() {
             <Route path="/watch/tv/:id/:season/:episode" element={<TVWatchPage />} />
             <Route path="/watchlist" element={<WatchlistPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/admin" element={<AdminPage />} />
           </Routes>
         </main>
         <Footer />

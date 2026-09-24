@@ -105,13 +105,13 @@ export const VyreVideoPlayer: React.FC<VyreVideoPlayerProps> = ({
           <div
             onClick={handleShieldClick}
             className="absolute inset-0 z-30 bg-black/40 hover:bg-black/20 cursor-pointer flex flex-col items-center justify-center transition-all group/shield p-4 text-center"
-            title="Click to enable player controls"
+            title="Click once to start video player and unblock controls"
           >
             <div className="px-5 py-3 bg-[#0B0D10]/95 border border-[#D6FF3F]/60 backdrop-blur-md rounded-2xl text-xs font-extrabold text-[#D6FF3F] shadow-2xl flex items-center gap-3 group-hover/shield:scale-105 transition-transform">
               <ShieldCheck className="w-5 h-5 fill-[#D6FF3F]/20 text-[#D6FF3F]" />
               <div className="text-left space-y-0.5">
-                <p className="tracking-wider uppercase text-[11px] font-black">AD-SHIELD ACTIVE (CLICK TO START)</p>
-                <p className="text-[10px] text-[#9BA3AE] font-normal">Blocks annoying popups & enables instant audio controls</p>
+                <p className="tracking-wider uppercase text-[11px] font-black">CLICK ONCE TO START PLAYER (AD-SHIELD PROTECTED)</p>
+                <p className="text-[10px] text-[#9BA3AE] font-normal">Enables video timeline seek bar & instant audio language switching</p>
               </div>
             </div>
           </div>
@@ -119,7 +119,7 @@ export const VyreVideoPlayer: React.FC<VyreVideoPlayerProps> = ({
 
         {/* AUDIO SWITCHING TOAST NOTIFICATION */}
         {switchingToast && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 px-4 py-2 bg-[#0B0D10]/90 border border-[#D6FF3F] backdrop-blur-md text-[#D6FF3F] text-xs font-extrabold rounded-full shadow-2xl flex items-center gap-2 animate-bounce">
+          <div className="absolute top-14 left-1/2 -translate-x-1/2 z-40 px-4 py-2 bg-[#0B0D10]/95 border border-[#D6FF3F] backdrop-blur-md text-[#D6FF3F] text-xs font-extrabold rounded-full shadow-2xl flex items-center gap-2 animate-bounce">
             <Volume2 className="w-4 h-4 animate-pulse" />
             <span>{switchingToast}</span>
           </div>
@@ -154,16 +154,16 @@ export const VyreVideoPlayer: React.FC<VyreVideoPlayerProps> = ({
           />
         )}
 
-        {/* INTEGRATED OVERLAY CONTROL BAR FOR AUDIO & SUBTITLES */}
-        <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3 flex items-center justify-between opacity-90 group-hover/player:opacity-100 transition-opacity">
+        {/* TOP OVERLAY PILLS - POSITIONED AT TOP TO LEAVE BOTTOM SEEK BAR 100% UNCLUTTERED AND CLICKABLE */}
+        <div className="absolute top-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none opacity-90 group-hover/player:opacity-100 transition-opacity">
           {/* Active Audio & Subtitle Status Pills */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 pointer-events-auto">
             <button
               onClick={() => {
                 setActiveTab('audio');
                 setShowSettingsMenu(true);
               }}
-              className="px-3 py-1.5 bg-[#171B21]/90 border border-[#D6FF3F]/40 hover:border-[#D6FF3F] backdrop-blur-md rounded-xl text-xs font-bold text-[#D6FF3F] flex items-center gap-1.5 transition-all hover:scale-105"
+              className="px-3 py-1.5 bg-[#0B0D10]/90 border border-[#D6FF3F]/60 hover:border-[#D6FF3F] backdrop-blur-md rounded-xl text-xs font-bold text-[#D6FF3F] flex items-center gap-1.5 transition-all hover:scale-105 shadow-xl"
             >
               <Volume2 className="w-3.5 h-3.5" />
               <span>{activeAudioTrack.flag} {activeAudioTrack.label}</span>
@@ -174,7 +174,7 @@ export const VyreVideoPlayer: React.FC<VyreVideoPlayerProps> = ({
                 setActiveTab('subtitles');
                 setShowSettingsMenu(true);
               }}
-              className="px-3 py-1.5 bg-[#171B21]/90 border border-[#292F37] hover:border-[#9BA3AE] backdrop-blur-md rounded-xl text-xs font-bold text-[#9BA3AE] hover:text-white flex items-center gap-1.5 transition-all"
+              className="px-3 py-1.5 bg-[#0B0D10]/90 border border-[#292F37] hover:border-[#9BA3AE] backdrop-blur-md rounded-xl text-xs font-bold text-[#9BA3AE] hover:text-white flex items-center gap-1.5 transition-all shadow-xl"
             >
               <MessageSquare className="w-3.5 h-3.5 text-[#D6FF3F]" />
               <span>SUB: {activeSubtitle.label}</span>
@@ -182,13 +182,13 @@ export const VyreVideoPlayer: React.FC<VyreVideoPlayerProps> = ({
           </div>
 
           {/* Quick Player Settings & Fullscreen */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 pointer-events-auto">
             <button
               onClick={() => {
                 setActiveTab('main');
                 setShowSettingsMenu(!showSettingsMenu);
               }}
-              className="p-2 bg-[#171B21]/90 border border-[#292F37] hover:border-[#D6FF3F] backdrop-blur-md text-[#9BA3AE] hover:text-[#D6FF3F] rounded-xl transition-all"
+              className="p-2 bg-[#0B0D10]/90 border border-[#292F37] hover:border-[#D6FF3F] backdrop-blur-md text-[#9BA3AE] hover:text-[#D6FF3F] rounded-xl transition-all shadow-xl"
               title="Player Audio & Subtitle Settings"
             >
               <Settings className="w-4 h-4" />
@@ -196,7 +196,7 @@ export const VyreVideoPlayer: React.FC<VyreVideoPlayerProps> = ({
 
             <button
               onClick={toggleFullscreen}
-              className="p-2 bg-[#171B21]/90 border border-[#292F37] hover:border-[#D6FF3F] backdrop-blur-md text-[#9BA3AE] hover:text-white rounded-xl transition-all"
+              className="p-2 bg-[#0B0D10]/90 border border-[#292F37] hover:border-[#D6FF3F] backdrop-blur-md text-[#9BA3AE] hover:text-white rounded-xl transition-all shadow-xl"
               title="Fullscreen"
             >
               <Maximize className="w-4 h-4" />
@@ -206,7 +206,7 @@ export const VyreVideoPlayer: React.FC<VyreVideoPlayerProps> = ({
 
         {/* MODAL SETTINGS & AUDIO TRACK MENU OVERLAY */}
         {showSettingsMenu && (
-          <div className="absolute bottom-14 right-4 z-40 w-72 bg-[#111419]/95 border border-[#292F37] backdrop-blur-xl rounded-2xl shadow-2xl p-4 text-xs font-sans animate-in fade-in zoom-in-95 duration-150 space-y-3">
+          <div className="absolute top-14 right-4 z-40 w-72 bg-[#111419]/95 border border-[#292F37] backdrop-blur-xl rounded-2xl shadow-2xl p-4 text-xs font-sans animate-in fade-in zoom-in-95 duration-150 space-y-3">
             {/* Header / Tabs */}
             <div className="flex items-center justify-between border-b border-[#292F37] pb-2">
               <span className="font-extrabold text-[#F4F5F7] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
@@ -355,6 +355,45 @@ export const VyreVideoPlayer: React.FC<VyreVideoPlayerProps> = ({
           </div>
         )}
       </div>
+
+      {/* HINDI DUBBING SERVER HELPER NOTIFICATION */}
+      {activeAudioTrack.id === 'hi' && (
+        <div className="p-3.5 bg-[#111419] border border-[#D6FF3F]/70 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-[#F4F5F7] shadow-xl">
+          <div className="flex items-center gap-2.5">
+            <span className="text-2xl">🇮🇳 🔊</span>
+            <div>
+              <p className="font-extrabold text-[#D6FF3F] uppercase tracking-wider text-[11px]">
+                Hindi Dubbed Audio Active
+              </p>
+              <p className="text-[11px] text-[#9BA3AE]">
+                If the video is still playing in English, switch to <span className="font-bold text-white">Server 2 (MultiEmbed)</span> or <span className="font-bold text-white">Server 3 (SmashyStream)</span> below!
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => handleServerChange('multiembed')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                activeServer === 'multiembed'
+                  ? 'bg-[#D6FF3F] text-[#0B0D10] border-[#D6FF3F]'
+                  : 'bg-[#171B21] text-[#F4F5F7] border-[#292F37] hover:border-[#D6FF3F]'
+              }`}
+            >
+              Switch to Server 2 (Hindi Dub)
+            </button>
+            <button
+              onClick={() => handleServerChange('smashystream')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                activeServer === 'smashystream'
+                  ? 'bg-[#D6FF3F] text-[#0B0D10] border-[#D6FF3F]'
+                  : 'bg-[#171B21] text-[#F4F5F7] border-[#292F37] hover:border-[#D6FF3F]'
+              }`}
+            >
+              Switch to Server 3
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* DYNAMIC AUDIO TRACK SELECTOR BAR UNDER PLAYER */}
       <div className="bg-[#111419] border border-[#292F37] p-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-lg">
